@@ -84,7 +84,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ### ARC-002 — Propose the versioned API contract
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Task:** ARC-002
 - **Date:** 2026-09-02
 - **Requirements:** FR-001 through FR-011, NFR-001, NFR-004, NFR-005, SEC-001 through SEC-010, REL-001 through REL-006, REL-010, REL-012, PERF-001 through PERF-003, OBS-006, OBS-008, AC-001 through AC-016
@@ -92,7 +92,20 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Contract policies translated:** Creation accepts only `url`, preserves accepted HTTP/HTTPS destinations up to 4,096 characters, rejects baseline-prohibited expiration fields, returns the short code and one-time analytics token, and remains non-idempotent. Analytics accepts UTC `from`/`to` with inclusive/exclusive bounds, a default 30-day range, a maximum 90-day range, and `day` buckets; it returns only aggregate counts and `asOf`.
 - **Alternatives evaluated:** Unversioned paths; public analytics; analytics keyed by short code alone; returning `403` for invalid tokens; permanent or method-preserving redirects; accepting expiration in the baseline; destination-based idempotency; and framework-default error bodies. These alternatives either conflict with approved privacy/lifecycle policy, increase disclosure, weaken service control, or reduce client stability.
 - **Open wire details:** Exact JSON property naming, optional `Location` on creation, the `405` envelope/`Allow` header, `Retry-After` calculation, informational rate-limit headers, content-negotiation normalization, and environment-specific base URL/proxy values remain proposed in `docs/api.md` and require engineer review.
-- **Engineer disposition:** PENDING — the engineer must review the complete API contract before creation, redirect, analytics, or contract-test implementation tasks are accepted.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-002 API contract on 2026-09-02. The remaining wire details are accepted as documented proposals for implementation review; changes that materially alter the contract require a new decision.
+
+### ARC-003 — Propose mapping and lifecycle data model
+
+- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Task:** ARC-003
+- **Date:** 2026-09-02
+- **Requirements:** FR-003, FR-004, FR-006, FR-007, FR-010, NFR-002, NFR-008, NFR-012, SEC-003, SEC-004, SEC-006, SEC-007, REL-001, REL-002, REL-009, REL-012, PERF-005, OBS-005, OBS-011, AC-001, AC-003 through AC-005, AC-008, AC-010 through AC-013, AC-015, AC-019, AC-022
+- **Decision:** Use PostgreSQL tables `links` and `click_events` with database-generated `BIGINT` internal keys. Store exact validated destinations, ten-character case-sensitive short codes, SHA-256 analytics-token hashes, UTC creation/event timestamps, link foreign keys, and coarse traffic classes. Enforce code uniqueness, Base62 shape, URL length, hash length, foreign-key integrity, and `(link_id, occurred_at)` analytics lookup indexing in the database. Do not store expiration, disabled/status, owner, tenant, idempotency, or mutable-destination state in the baseline.
+- **Consistency and transaction policy:** Creation writes one mapping transaction and returns only after durable commit. Analytics append uses a separate bounded transaction and remains fail-open for redirects. Queries read committed retained events from one snapshot. The database unique constraint, not a pre-check or distributed lock, arbitrates collisions.
+- **Schema-evolution policy:** Use reviewed versioned migration artifacts with explicit preconditions; do not permit Hibernate destructive auto-update. Prefer runtime schema validation and tested roll-forward or reversible changes. Production backup/restore rollback claims remain deferred by RDR-004.
+- **Alternatives evaluated:** A document schema; destination-URL deduplication; storing expiration/status/idempotency fields speculatively; counter-only analytics; separate analytics storage; and application-only uniqueness. These either conflict with approved semantics or weaken transactional correctness and traceability.
+- **Open model details:** Exact migration tool, PostgreSQL collation declaration, deletion policy if mappings later become mutable, and database-versus-application authoritative clock implementation remain implementation-level choices requiring review before persistence work.
+- **Engineer disposition:** PENDING — the engineer must review the model and migration policy before schema or repository implementation is accepted.
 
 ## Decision summary
 
