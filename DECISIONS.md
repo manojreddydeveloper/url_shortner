@@ -20,6 +20,18 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 | `SUPERSEDED` | A later approved decision replaces this entry |
 | `DEFERRED` | No decision is needed until a documented trigger occurs |
 
+## Requirements scope decisions
+
+### RDR-001 — Approve initial functional scope and non-goals
+
+- **Status:** APPROVED
+- **Task:** REQ-001
+- **Date:** 2026-09-02
+- **Decision:** Approve FR-001 through FR-012 and the Section 11 non-goals in `ENGINEERING_PLAN.md` as written.
+- **Rationale:** The functional requirements retain creation, redirect, analytics, failure handling, concurrency, request-policy, and AI-traceability capabilities required by the assignment. The non-goals constrain unrelated product and infrastructure expansion.
+- **Boundary:** This decision approves capability scope only. It does not resolve AMB-001 through AMB-016, approve assumptions, establish non-functional targets, approve any ADR below, authorize dependencies, or approve implementation output.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the REQ-001 documentation changes on 2026-09-02.
+
 ## Decision summary
 
 | ID | Topic | Proposed outcome | Status |

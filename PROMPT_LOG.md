@@ -90,3 +90,24 @@ Copy this template for every new material AI activity.
 - **Validation:** AI structural check passed: Markdown whitespace validation reported no errors; all seven requested statuses are defined; the reusable template and this record each contain all 17 requested fields. Engineer validation remains PENDING.
 - **Test Results:** Not applicable — this activity changes documentation only and introduces no executable behavior.
 - **Engineer Approval:** PENDING
+
+### PROMPT-002
+
+- **Prompt ID:** PROMPT-002
+- **Task ID:** REQ-001
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Execute the earliest dependency-eligible task by recording the engineer's disposition of the initial functional scope and non-goals.
+- **Context Provided:** `ENGINEERING_PLAN.md`, `TASKS.md`, `DECISIONS.md`, `TRACEABILITY.md`, the repository state, and the engineer's explicit “yes” response approving FR-001 through FR-012 and the current non-goals as written.
+- **Constraints:** Execute only REQ-001; do not resolve ambiguities, approve assumptions or ADRs, add dependencies, implement source code, mark the task `APPROVED`, or continue to another task; update traceability and this log with factual results only.
+- **Acceptance Criteria:** Every FR-001 through FR-012 has a recorded disposition and rationale; required actors and creation, redirect, analytics, lifecycle, failure, concurrency, request-policy, and traceability capabilities remain explicit; the current non-goals are explicitly approved; outcomes are recorded in `ENGINEERING_PLAN.md` and `DECISIONS.md`; goals, requirements, non-goals, ambiguities, and acceptance criteria remain consistent.
+- **AI Output Summary:** Added a bounded functional-scope disposition, logical actor list, and rationales; recorded RDR-001; and updated traceability to distinguish approved capability scope from pending policy decisions and not-yet-started implementation evidence.
+- **Files Changed:** `ENGINEERING_PLAN.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** The engineer reviewed the REQ-001 changes and explicitly approved them on 2026-09-02.
+- **Accepted Output:** FR-001 through FR-012, the Section 11 non-goals, the functional-scope disposition and rationales, the logical actor descriptions, RDR-001, and the associated traceability updates.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` passed. Identifier checks found 12 functional requirement definitions, 12 disposition rows, and 12 traceability rows with no set difference. Checks also confirmed that all 16 ambiguity statuses remain `PENDING ENGINEER APPROVAL` and all 14 ADR summary statuses remain `PROPOSED`.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 10 seconds with 4 tasks executed. The generated JUnit reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These application tests are regression evidence; REQ-001 itself is a documentation and decision-record task.
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.

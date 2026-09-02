@@ -40,6 +40,32 @@ The following requirements normalize the assignment's request for core APIs, ana
 - **FR-011 — Return documented errors:** APIs shall return stable, machine-readable error responses for approved client, rate-limit, dependency, and internal failure classes.
 - **FR-012 — Preserve AI-work traceability:** Each AI-assisted implementation change shall be traceable to its requirement, prompt or instruction, affected artifacts, engineer edits, validation evidence, review result, and acceptance or rejection.
 
+### Functional scope disposition
+
+On 2026-09-02, the engineer approved FR-001 through FR-012 as written for REQ-001. This approval establishes capability scope only. Terms that depend on an “approved” policy remain unresolved until their corresponding ambiguity and downstream requirement tasks are explicitly decided.
+
+The approved capability scope involves these logical actors:
+
+- **Creation client:** Submits a destination and receives the approved short reference.
+- **Redirect client:** Requests a short code and receives the approved resolution outcome.
+- **Analytics consumer:** Retrieves approved analytics through an access model that remains pending REQ-003.
+- **Engineer/operator:** Reviews AI-assisted changes, validates evidence, and controls approvals; operational interfaces remain subject to later requirements.
+
+| Requirement | Disposition | Rationale |
+| --- | --- | --- |
+| FR-001 | APPROVED AS WRITTEN | URL creation is a core assignment capability while its validation policy remains separately decidable. |
+| FR-002 | APPROVED AS WRITTEN | A successful creation must produce a usable reference without prematurely fixing the response representation. |
+| FR-003 | APPROVED AS WRITTEN | Mapping uniqueness is required for correct and safe resolution. |
+| FR-004 | APPROVED AS WRITTEN | Redirect resolution is a core assignment capability while redirect semantics remain separately decidable. |
+| FR-005 | APPROVED AS WRITTEN | Unsuccessful lookups require deterministic behavior without assuming optional lifecycle features. |
+| FR-006 | APPROVED AS WRITTEN | Lifecycle behavior must follow later policy decisions and unapproved lifecycle capabilities remain excluded. |
+| FR-007 | APPROVED AS WRITTEN | Analytics is required by the assignment, subject to later click, bot, privacy, and failure decisions. |
+| FR-008 | APPROVED AS WRITTEN | Required analytics must have a retrieval mechanism whose exact contract remains separately decidable. |
+| FR-009 | APPROVED AS WRITTEN | Input, access, size, and abuse controls must follow explicit policies rather than implicit defaults. |
+| FR-010 | APPROVED AS WRITTEN | Concurrency must preserve the uniqueness and consistency semantics selected by later tasks. |
+| FR-011 | APPROVED AS WRITTEN | Stable error behavior is required without prematurely selecting every failure mapping. |
+| FR-012 | APPROVED AS WRITTEN | Traceability is a required assessment capability and preserves human oversight of AI-assisted work. |
+
 ## 4. Non-Functional Requirements
 
 - **NFR-001 — Documentation:** Approved API, configuration, operational, failure, security, privacy, and validation behavior shall be documented.
@@ -263,6 +289,8 @@ The following are planning assumptions only. None authorizes implementation, and
 ## 11. Non-Goals
 
 Unless separately approved as new requirements, the following are outside the initial assignment scope:
+
+The engineer approved this non-goal list as written on 2026-09-02 for REQ-001. This disposition does not decide the separate ambiguities or architecture proposals elsewhere in this plan.
 
 - Browser or mobile user interfaces
 - User accounts, billing, subscriptions, or payment processing
