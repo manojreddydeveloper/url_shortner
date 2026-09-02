@@ -7,7 +7,7 @@
 - **Implementation authorized:** No
 - **Related requirements:** FR-001 through FR-011, SEC-001 through SEC-010, REL-001 through REL-012
 
-This contract reflects the simplest architecture proposed in `docs/architecture.md`. Values marked `TBD` and all proposed behavior require engineer approval before implementation.
+This contract reflects the ARC-001 architecture proposal and the approved RDR-001 through RDR-004 requirements. The wire-level choices in this document remain proposed until ARC-002 receives explicit engineer approval.
 
 ## Conventions
 
@@ -26,12 +26,12 @@ Management API requests and responses use `application/json`. Redirect responses
 ### Time
 
 - Timestamps use ISO 8601 UTC with a `Z` suffix.
-- Expiration boundary inclusivity is pending engineer approval.
-- Analytics time buckets and range bounds must be documented before implementation.
+- Baseline links do not expire; expiration fields and expired responses are not part of this contract.
+- Analytics uses UTC daily buckets, an inclusive `from`, exclusive `to`, a default 30-day range, and a maximum 90-day range.
 
 ### Identifiers
 
-- Proposed short code: exactly ten case-sensitive Base62 characters matching `[0-9A-Za-z]{10}`.
+- Short code: exactly ten case-sensitive Base62 characters matching `[0-9A-Za-z]{10}`.
 - Codes must not be decoded into internal database identifiers.
 - Request correlation IDs are returned through `X-Request-ID` and in safe API error envelopes.
 
@@ -68,17 +68,15 @@ Rules:
 
 ```json
 {
-  "url": "https://example.com/articles/architecture?source=demo",
-  "expiresAt": "2026-12-31T23:59:59Z"
+  "url": "https://example.com/articles/architecture?source=demo"
 }
 ```
 
 | Field | Required | Proposed rules |
 | --- | --- | --- |
-| `url` | Yes | Absolute `http` or `https`; non-empty host; no credentials or control characters; maximum length `TBD`; preserved after approved structural validation |
-| `expiresAt` | No | UTC timestamp later than creation and within an approved maximum; omit for no expiration if that policy is approved |
+| `url` | Yes | Absolute `http` or `https`; non-empty approved host form; no credentials, whitespace, malformed escapes, or control characters; maximum 4,096 characters; preserved exactly after structural validation |
 
-Unknown request fields are proposed to be rejected to catch client mistakes. That behavior remains pending approval.
+Unknown request fields are rejected with `400 VALIDATION_ERROR` so clients cannot assume unsupported lifecycle or management behavior.
 
 ### Success
 
@@ -90,12 +88,11 @@ Proposed status: `201 Created`
   "shortUrl": "https://sho.rt/aZ3kP9mQ2x",
   "url": "https://example.com/articles/architecture?source=demo",
   "createdAt": "2026-09-02T15:30:00Z",
-  "expiresAt": "2026-12-31T23:59:59Z",
   "analyticsToken": "generated-base64url-bearer-token"
 }
 ```
 
-- `analyticsToken` is returned once if the proposed per-link token model is approved.
+- `analyticsToken` is returned once under the approved per-link token model.
 - The plaintext token must not be stored, logged, placed in a URL, or returned by another endpoint.
 - `Location` may identify a future link-resource endpoint only if such an endpoint is approved; it is not defined by this design.
 
@@ -111,7 +108,7 @@ Proposed status: `201 Created`
 | Status | Error code | Condition |
 | --- | --- | --- |
 | `400` | `INVALID_JSON` | Body is not valid JSON |
-| `400` | `VALIDATION_ERROR` | URL or expiration violates the approved policy |
+| `400` | `VALIDATION_ERROR` | URL, unsupported field, or baseline-prohibited expiration field violates the approved policy |
 | `413` | `PAYLOAD_TOO_LARGE` | Request exceeds the approved limit |
 | `415` | `UNSUPPORTED_MEDIA_TYPE` | Content type is not supported |
 | `429` | `RATE_LIMITED` | Approved creation limit is exceeded |
@@ -139,7 +136,7 @@ Cache-Control: no-store
 X-Request-ID: 01JEXAMPLE0000000000000000
 ```
 
-`Cache-Control: no-store` is the conservative proposed baseline because client caching could bypass analytics and expiration. If a different caching policy is approved, it must state its effect on analytics and lifecycle guarantees.
+`Cache-Control: no-store` is required by RDR-002 so redirects remain under service control and do not bypass analytics or future lifecycle controls.
 
 ### Redirect outcomes
 
@@ -147,16 +144,15 @@ X-Request-ID: 01JEXAMPLE0000000000000000
 | --- | --- | --- |
 | `302` | `ACTIVE` | The active mapping resolved; analytics is attempted under the fail-open policy |
 | `404` | `NOT_FOUND` | The code format is valid but no mapping exists |
-| `410` | `EXPIRED` | The mapping exists but is expired; conditional on expiration approval |
-| `429` | `RATE_LIMITED` | Optional redirect limit is exceeded if such a limit is approved |
+| `429` | `RATE_LIMITED` | Not emitted by the application baseline; coarse edge protection remains possible |
 | `503` | `DEPENDENCY_UNAVAILABLE` | The authoritative mapping result cannot be determined safely |
 
-Malformed code handling may return `404` rather than a detailed `400` to reduce unnecessary distinction on the public redirect surface. The exact choice remains pending engineer approval.
+Malformed and unknown codes both return `404 Not Found` without `Location` to avoid unnecessary public distinction.
 
 ### Method handling
 
 - `GET` is supported.
-- `HEAD` support is pending because preview clients and bots may affect click definition.
+- `HEAD` is unsupported and returns the framework's `405 Method Not Allowed`; it creates no analytics event.
 - Other methods are rejected using the framework's approved `405 Method Not Allowed` behavior.
 - The service does not forward the original request method or body to the destination.
 
@@ -165,7 +161,7 @@ Malformed code handling may return `404` rather than a detailed `400` to reduce 
 - Proposed click boundary: an active mapping reaches analytics event capture immediately before the redirect response.
 - Analytics insertion failure does not change the redirect response.
 - The response does not prove that the browser reached the destination.
-- The treatment of `HEAD`, browser prefetch, retries, and suspected bots remains subject to the approved analytics policy.
+- Browser prefetch, retries, refreshes, and suspected bots follow the approved analytics event-decision matrix; each eligible GET is counted independently.
 
 ## 3. Retrieve link analytics
 
@@ -182,11 +178,11 @@ Authorization: Bearer generated-base64url-bearer-token
 | Parameter | Required | Proposed rules |
 | --- | --- | --- |
 | `code` | Yes | Approved fixed-length case-sensitive code |
-| `from` | No | Inclusive UTC start; approved default window `TBD` |
-| `to` | No | Exclusive UTC end; defaults to request time if approved |
-| `bucket` | No | Baseline supports `day`; total-only response remains an alternative |
+| `from` | No | Inclusive UTC start; defaults to 30 days before query time |
+| `to` | No | Exclusive UTC end; defaults to query time |
+| `bucket` | No | Must be `day`; daily UTC buckets are returned with totals |
 
-The allowed range and maximum query window are `TBD` and must be bounded to prevent expensive requests.
+The range must be non-negative and no longer than 90 days. Invalid timestamps, ranges, or bucket values return `400 VALIDATION_ERROR`.
 
 ### Success
 
@@ -200,15 +196,15 @@ Proposed status: `200 OK`
   "bucket": "day",
   "totals": {
     "all": 42,
-    "suspectedBot": 7,
-    "unknown": 35
+    "suspectedAutomated": 7,
+    "unclassified": 35
   },
   "buckets": [
     {
       "start": "2026-09-01T00:00:00Z",
       "all": 18,
-      "suspectedBot": 2,
-      "unknown": 16
+      "suspectedAutomated": 2,
+      "unclassified": 16
     }
   ],
   "asOf": "2026-09-02T15:30:00Z"
@@ -218,10 +214,10 @@ Proposed status: `200 OK`
 Semantics:
 
 - `all` includes every stored event in the range.
-- `suspectedBot` is heuristic and does not establish automated identity with certainty.
-- `unknown` must not be labeled “human” or “unique visitor.”
+- `suspectedAutomated` is heuristic and does not establish automated identity with certainty.
+- `unclassified` must not be labeled “human” or “unique visitor.”
 - The API does not expose raw click events, IP addresses, user agents, referrers, or destinations.
-- Counts are best-effort under the proposed analytics failure policy and are not exactly once.
+- Counts are best-effort under the approved analytics failure policy and are not exactly once.
 
 ### Errors
 
@@ -229,12 +225,11 @@ Semantics:
 | --- | --- | --- |
 | `400` | `VALIDATION_ERROR` | Invalid time range, bucket, or code syntax under the approved policy |
 | `401` | `AUTHENTICATION_REQUIRED` | Analytics token is missing |
-| `403` | `ACCESS_DENIED` | Token is invalid for the link; use of `404` to reduce existence disclosure remains an alternative |
-| `404` | `NOT_FOUND` | Mapping does not exist, subject to approved anti-enumeration behavior |
+| `404` | `NOT_FOUND` | Mapping does not exist or the bearer token is invalid for the link |
 | `429` | `RATE_LIMITED` | Analytics query limit is exceeded |
 | `503` | `DEPENDENCY_UNAVAILABLE` | Analytics cannot be queried safely |
 
-Token comparison uses the stored hash and an approved constant-time comparison. Tokens never appear in query parameters.
+Token comparison uses the stored hash and a constant-time comparison. Tokens never appear in query parameters.
 
 ## 4. Health endpoints
 
@@ -242,19 +237,18 @@ Token comparison uses the stored hash and an approved constant-time comparison. 
 
 `GET /health/live`
 
-- Proposed success: `200 OK` when the process can execute its event loop or request handler.
-- Does not fail solely because PostgreSQL, Redis, or analytics is unavailable.
+- Success: `200 OK` when the process can execute its event loop or request handler.
+- Does not fail solely because PostgreSQL or analytics is unavailable.
 - Returns no configuration, dependency address, version inventory, or stack detail.
 
 ### Readiness
 
 `GET /health/ready`
 
-- Proposed success: `200 OK` when the instance can safely serve approved traffic.
-- Proposed failure: `503 Service Unavailable` when required dependencies are unavailable.
+- Success: `200 OK` when the instance can safely serve approved traffic.
+- Failure: `503 Service Unavailable` when PostgreSQL is unavailable.
 - PostgreSQL is required in the no-cache baseline.
-- Redis is not a required dependency unless an approved design makes its function mandatory.
-- The exact analytics readiness effect follows the approved fail-open policy.
+- Analytics append failure does not make readiness false because redirects fail open for analytics.
 
 Response bodies are intentionally minimal and must not expose sensitive operational detail.
 
@@ -268,18 +262,18 @@ Retry-After: 30
 Content-Type: application/json
 ```
 
-The response uses the common error envelope with `RATE_LIMITED`. Numeric quotas, windows, burst values, client identity, and whether informational limit headers are exposed remain `TBD`.
+The response uses the common error envelope with `RATE_LIMITED` and a bounded `Retry-After` value. Creation uses capacity 20/refill 10 per minute per derived client identity; analytics retrieval uses capacity 60/refill 60 per minute per bearer token. State is in-memory for the single-instance baseline and resets on restart.
 
 Proposed scope:
 
 - Creation: limited.
 - Analytics retrieval: limited.
-- Redirect: coarse edge protection; application limit only if an approved abuse or capacity need exists.
+- Redirect: no application quota in the single-instance baseline; coarse edge protection remains possible.
 
 ## 6. Caching contract
 
 - Baseline: application responses and resolution do not depend on Redis.
-- Redirect responses use conservative client cache control until analytics and expiration effects are approved.
+- Redirect responses use `Cache-Control: no-store`.
 - If Redis mapping cache is added, it is transparent to the API and cannot change active, unknown, expired, or dependency-failed semantics.
 - Unknown-code negative caching is not part of the baseline.
 - Database failure must not be returned as `404` because a cache lookup missed.
@@ -296,21 +290,37 @@ Proposed scope:
 - Apply approved authentication and authorization before analytics data access.
 - Return safe errors without stack, SQL, dependency, or private-resource details.
 
-## 8. Open contract decisions
+## 8. Contract-test matrix
 
-The API cannot be considered approved until the engineer decides:
+The following cases are the contract-test baseline. They are documentation evidence for ARC-002; executable tests belong to later implementation tasks.
 
-1. Maximum request and URL lengths.
-2. Whether optional expiration is supported and its bounds and exact boundary.
-3. Whether `HEAD` redirects count, redirect, or return another outcome.
-4. Final malformed-code and invalid-analytics-token disclosure behavior.
-5. Creation and analytics quotas and client identity.
-6. Whether per-link bearer tokens are the approved analytics authorization model.
-7. Analytics default and maximum time range, bucket support, freshness, loss, and retention.
-8. Whether `Cache-Control: no-store` is required or a bounded redirect cache is acceptable.
-9. Whether creation requires explicit idempotency.
-10. Exact public base URL and trusted proxy behavior per environment.
+| Case | Request | Expected result | Coverage |
+| --- | --- | --- | --- |
+| Create valid URL | `POST /api/v1/links` with an accepted 4,096-character-or-shorter URL | `201`, exact URL preserved, ten-character code, one-time analytics token | FR-001/FR-002, AC-001/AC-003 |
+| Reject invalid URL | Unsupported scheme, credentials, control/whitespace, malformed escape, missing host, or length 4,097 | `400 VALIDATION_ERROR`, no mapping | FR-001/FR-009, SEC-001/SEC-002, AC-002 |
+| Reject prohibited field | Creation body contains `expiresAt` or another unknown field | `400 VALIDATION_ERROR` | FR-006, AC-007 |
+| Create duplicate destination | Two ordinary requests contain the same accepted URL | Two independent `201` responses and distinct persisted codes | FR-010, AC-005 |
+| Redirect active code | `GET /{code}` for a known mapping | `302`, exact `Location`, `Cache-Control: no-store`, analytics attempted | FR-004, AC-006/AC-010 |
+| Redirect malformed/unknown | Invalid code shape or valid-shape code without mapping | `404`, no `Location`, no analytics event | FR-005, AC-007 |
+| Redirect datastore failure | Known-shape code while lookup cannot complete | `503 DEPENDENCY_UNAVAILABLE`, no false `404` | REL-003, AC-009 |
+| Redirect unsupported method | `HEAD` or another method on `/{code}` | `405`, no redirect, no analytics event | FR-004/FR-009, AC-007 |
+| Analytics authorized | Valid bearer token and range at or below 90 days | `200`, totals and daily UTC buckets with `asOf` | FR-008, SEC-009, AC-013 |
+| Analytics unauthorized | Missing token, invalid token, or unknown code | `401` only for missing token; otherwise `404 NOT_FOUND` | SEC-009, AC-013 |
+| Analytics invalid range | `to < from`, range over 90 days, invalid timestamp, or bucket | `400 VALIDATION_ERROR` | FR-008, AC-013 |
+| Rate limit exceeded | Creation or analytics request above approved token bucket | `429 RATE_LIMITED` with bounded `Retry-After` | FR-009, SEC-005, AC-014 |
+| Safe dependency error | Any dependency/internal failure | Stable envelope without secrets, SQL, stack, URLs, tokens, or addresses | FR-011, SEC-010, AC-015/AC-016 |
+
+## 9. Open contract decisions
+
+The following wire-level details remain proposed for engineer review; they do not change the approved requirements:
+
+1. Exact JSON property naming and whether `details` is omitted or returned as an empty list.
+2. Whether creation includes an HTTP `Location` header for a future link-resource endpoint; no such endpoint is part of the baseline.
+3. The exact `405 Method Not Allowed` response envelope and `Allow` header.
+4. The exact `Retry-After` value calculation and whether informational rate-limit headers are exposed.
+5. Whether the framework's default content negotiation errors are normalized into the common envelope.
+6. Environment-specific public base URL and trusted-proxy allowlist values.
 
 ## Approval gate
 
-This document is a proposed contract. It must be reviewed alongside `docs/architecture.md` and the proposed records in `DECISIONS.md`. Approval of individual decisions must be recorded before related implementation tasks become ready.
+This document is a proposed contract. It must be reviewed alongside `docs/architecture.md` and the ARC-002 record in `DECISIONS.md`. Approval must be recorded before creation, redirect, or analytics implementation tasks become ready.

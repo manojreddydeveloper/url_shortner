@@ -80,7 +80,19 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Dependency rationale:** Java, Gradle, Spring Boot, Hibernate/JPA, and PostgreSQL each have a direct role in the approved prototype. Redis, Kafka, queues, and additional services have no baseline role and remain conditional evolution options only.
 - **Trust and data boundary:** Clients and forwarding metadata are untrusted until validated; PostgreSQL is authoritative but failure must remain distinguishable from not-found; analytics and operational telemetry remain separate and privacy-safe; configured public base URL and explicitly trusted proxy addresses are the only trusted deployment inputs.
 - **Revisit triggers:** Add infrastructure or split a service only after measured failure against an approved target, a new deployment/ownership requirement, or a new engineer-approved durability, replay, global-rate-limit, or multi-region requirement.
-- **Engineer disposition:** PENDING — the engineer must review this architecture proposal before ARC-002 through ARC-005 or project-foundation dependency changes are accepted.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-001 architecture proposal on 2026-09-02. This approval authorizes downstream architecture and foundation tasks to proceed within the documented boundaries; it does not approve unlisted dependencies or source changes.
+
+### ARC-002 — Propose the versioned API contract
+
+- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Task:** ARC-002
+- **Date:** 2026-09-02
+- **Requirements:** FR-001 through FR-011, NFR-001, NFR-004, NFR-005, SEC-001 through SEC-010, REL-001 through REL-006, REL-010, REL-012, PERF-001 through PERF-003, OBS-006, OBS-008, AC-001 through AC-016
+- **Decision:** Use `POST /api/v1/links` for anonymous creation, `GET /{code}` for anonymous redirect, `GET /api/v1/links/{code}/analytics` for token-protected aggregate analytics, and `/health/live` plus `/health/ready` for operational health. Use the common stable JSON error envelope, `201` creation, `302` redirect with exact `Location` and `Cache-Control: no-store`, `404` for malformed/unknown redirects and invalid analytics tokens, `401` for missing analytics credentials, `429` for approved creation/analytics quotas, and `503` for authoritative datastore or analytics-query unavailability.
+- **Contract policies translated:** Creation accepts only `url`, preserves accepted HTTP/HTTPS destinations up to 4,096 characters, rejects baseline-prohibited expiration fields, returns the short code and one-time analytics token, and remains non-idempotent. Analytics accepts UTC `from`/`to` with inclusive/exclusive bounds, a default 30-day range, a maximum 90-day range, and `day` buckets; it returns only aggregate counts and `asOf`.
+- **Alternatives evaluated:** Unversioned paths; public analytics; analytics keyed by short code alone; returning `403` for invalid tokens; permanent or method-preserving redirects; accepting expiration in the baseline; destination-based idempotency; and framework-default error bodies. These alternatives either conflict with approved privacy/lifecycle policy, increase disclosure, weaken service control, or reduce client stability.
+- **Open wire details:** Exact JSON property naming, optional `Location` on creation, the `405` envelope/`Allow` header, `Retry-After` calculation, informational rate-limit headers, content-negotiation normalization, and environment-specific base URL/proxy values remain proposed in `docs/api.md` and require engineer review.
+- **Engineer disposition:** PENDING — the engineer must review the complete API contract before creation, redirect, analytics, or contract-test implementation tasks are accepted.
 
 ## Decision summary
 

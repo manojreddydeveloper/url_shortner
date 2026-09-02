@@ -180,18 +180,39 @@ Copy this template for every new material AI activity.
 - **Prompt ID:** PROMPT-006
 - **Task ID:** ARC-001
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Select and document the simplest system boundaries and technical stack justified by the approved requirements and prototype operating envelope.
 - **Context Provided:** ARC-001 in `TASKS.md`; approved requirements and RDR-001 through RDR-004; existing `docs/architecture.md`, `docs/api.md`, `DECISIONS.md`, `TRACEABILITY.md`; the current Java/Gradle/Spring Boot foundation; and the engineer's explicit stack direction to use Java, Gradle, Spring Boot, and Hibernate.
 - **Constraints:** Execute only ARC-001; document proposals and alternatives without silently approving ADRs; install no dependencies; do not implement source code, change API contract details owned by ARC-002, define persistence schema owned by ARC-003, or continue to another task; preserve unrelated staged changes.
 - **Acceptance Criteria:** Compare runtime, framework, datastore, deployment, and component-boundary alternatives; document purpose, risk, maintenance, and simpler alternatives for each dependency; document request/data flows and trust boundaries; record the proposed architecture and dependency set in `DECISIONS.md`; run architecture consistency and regression validation.
 - **AI Output Summary:** Reconciled `docs/architecture.md` with the approved baseline, added the proposed Java/Spring Boot/Gradle/Hibernate/PostgreSQL stack and deployment boundary, removed baseline Redis/cache assumptions, aligned lifecycle, redirect, rate-limit, observability, and datastore statements, and recorded the ARC-001 architecture package in `DECISIONS.md`.
 - **Files Changed:** `docs/architecture.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — generated architecture proposals require explicit engineer review before downstream architecture or dependency work is accepted.
+- **Engineer Review:** The engineer reviewed the generated ARC-001 changes and explicitly approved them on 2026-09-02.
+- **Accepted Output:** The proposed technical stack, modular-monolith boundaries, PostgreSQL authority, no-baseline-infrastructure decisions, request/redirect/data/trust-flow reconciliation, alternatives, and evolution triggers.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` passed. The architecture document contains the proposed stack, component boundaries, request/redirect/data flows, trust boundaries, alternatives, and evolution triggers; the decision record contains ARC-001 and all 14 ADR summary entries remain `PROPOSED`. Checks found no stale ARC-001-era pending-target or observability-gap placeholders. These checks validate documentation consistency, not engineer approval or production feasibility.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 11 seconds with 4 tasks executed. JUnit XML reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are existing application regression tests; ARC-001 introduces no executable behavior.
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
+
+### PROMPT-007
+
+- **Prompt ID:** PROMPT-007
+- **Task ID:** ARC-002
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Define a stable, testable API contract for creation, redirect, analytics, health, errors, authentication, and rate limits.
+- **Context Provided:** ARC-002 in `TASKS.md`; approved FR, NFR, SEC, REL, PERF, and OBS requirements; RDR-001 through RDR-004; accepted ARC-001 architecture and stack; existing `docs/api.md`, `docs/architecture.md`, `DECISIONS.md`, and `TRACEABILITY.md`; and the current Spring Boot foundation.
+- **Constraints:** Execute only ARC-002; document the contract without implementing handlers, tests, dependencies, or persistence; do not silently add expiration, idempotency, public analytics, redirect quotas, or unsupported methods; preserve open wire-level choices as proposed and pending engineer approval.
+- **Acceptance Criteria:** Every approved functional capability has a success contract; required invalid, unknown, rate-limit, dependency, and internal outcomes are distinct; redirect status, exact `Location`, and `no-store` match RDR-002; analytics access/privacy/range semantics match RDR-003/RDR-004; FR/AC mappings and contract-test cases are documented.
+- **AI Output Summary:** Reconciled `docs/api.md` with the approved requirements and ARC-001 architecture; removed baseline expiration and Redis assumptions; specified creation, redirect, analytics, health, rate-limit, caching, security, error, and contract-test behavior; and recorded ARC-002 with explicit remaining wire-level review items in `DECISIONS.md`.
+- **Files Changed:** `docs/api.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — the generated contract requires explicit engineer review before API implementation tasks proceed.
 - **Accepted Output:** PENDING
 - **Edited Output:** PENDING
 - **Rejected Output:** PENDING
 - **Rejection Reason:** PENDING
-- **Validation:** `git diff --check` passed. The architecture document contains the proposed stack, component boundaries, request/redirect/data flows, trust boundaries, alternatives, and evolution triggers; the decision record contains ARC-001 and all 14 ADR summary entries remain `PROPOSED`. Checks found no stale ARC-001-era pending-target or observability-gap placeholders. These checks validate documentation consistency, not engineer approval or production feasibility.
-- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 11 seconds with 4 tasks executed. JUnit XML reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are existing application regression tests; ARC-001 introduces no executable behavior.
+- **Validation:** `git diff --check` passed. The API document contains creation, redirect, analytics, health, rate-limit, caching, security, error, and contract-test sections; the contract-test matrix includes 13 cases; the document has no unresolved `TBD` placeholders or stale baseline expiration/Redis assumptions; and 68 requirement traceability rows remain present. ARC-002 and its open wire-level review items are recorded in `DECISIONS.md`. These checks validate documentation consistency, not engineer approval or executable API behavior.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 15 seconds with 4 tasks executed. JUnit XML reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are existing application regression tests; ARC-002 introduces no executable behavior.
 - **Engineer Approval:** PENDING
