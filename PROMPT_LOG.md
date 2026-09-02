@@ -222,18 +222,39 @@ Copy this template for every new material AI activity.
 - **Prompt ID:** PROMPT-008
 - **Task ID:** ARC-003
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Define the authoritative mapping and analytics-event data model, consistency boundaries, retention, and schema-evolution policy.
 - **Context Provided:** ARC-003 in `TASKS.md`; approved requirements and RDR-001 through RDR-004; accepted ARC-001 architecture and ARC-002 API contract; existing `docs/architecture.md`, `docs/api.md`, `DECISIONS.md`, and `TRACEABILITY.md`; and the Java/Spring Boot/Hibernate/PostgreSQL stack direction.
 - **Constraints:** Execute only ARC-003; document the persistence model without implementing schema, entities, repositories, migrations, or dependencies; do not reintroduce expiration, idempotency, ownership, mutable destination, or speculative status fields; keep migration-tool and clock-authority details explicitly proposed where not required by the approved baseline.
 - **Acceptance Criteria:** Every field has purpose, type, nullability, source, and retention classification; uniqueness and collision behavior are atomic; duplicate/idempotency/expiration/inactive decisions are represented without ambiguity; transaction and lookup consistency boundaries are documented; migration and rollback expectations are documented for engineer approval.
 - **AI Output Summary:** Replaced the stale proposed database section with a PostgreSQL `links` and `click_events` model, explicit constraints and indexes, baseline lifecycle exclusions, transaction/consistency rules, and reviewed migration/rollback expectations. Recorded ARC-003 in `DECISIONS.md` and added persistence traceability.
 - **Files Changed:** `docs/architecture.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — the generated data model requires explicit engineer approval before schema or repository implementation.
+- **Engineer Review:** The engineer reviewed the generated ARC-003 changes and explicitly approved them on 2026-09-02.
+- **Accepted Output:** The PostgreSQL `links` and `click_events` model, field classifications, constraints, indexes, lifecycle exclusions, transaction/consistency rules, and migration/rollback policy.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` passed. The architecture database section defines `links` and `click_events` fields with purpose, type, nullability, source, retention, constraints, and indexes; documents transaction/consistency boundaries and lifecycle exclusions; and specifies reviewed migration, runtime-validation, and rollback expectations. ARC-003 is recorded in `DECISIONS.md` and `TRACEABILITY.md`. No application source, schema, migration, or dependency files changed.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 11 seconds with 4 tasks executed. JUnit XML reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are existing application regression tests; ARC-003 introduces no executable behavior.
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
+
+### PROMPT-009
+
+- **Prompt ID:** PROMPT-009
+- **Task ID:** ARC-004
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Define the minimal analytics data and processing architecture consistent with approved click, privacy, access, retention, failure, and performance semantics.
+- **Context Provided:** ARC-004 in `TASKS.md`; approved RDR-001 through RDR-004; accepted ARC-001, ARC-002, and ARC-003; existing architecture/API/decision/traceability documents; and the Java/Spring Boot/Hibernate/PostgreSQL baseline.
+- **Constraints:** Execute only ARC-004; document architecture and decisions without implementing source, schema, dependencies, queues, or services; preserve fail-open analytics and privacy boundaries; do not claim exactly-once delivery or destination arrival; keep additional infrastructure explicitly deferred pending measured need and engineer approval.
+- **Acceptance Criteria:** Event boundary, delivery/loss/consistency/freshness/retention guarantees, privacy transformations, redirect overhead target, and infrastructure alternatives are explicit and testable.
+- **AI Output Summary:** Added an ARC-004 guarantees/boundaries table to `docs/architecture.md`, recorded the analytics architecture decision and alternatives in `DECISIONS.md`, and added traceability/activity records.
+- **Files Changed:** `docs/architecture.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review required for event semantics, loss tolerance, privacy boundary, and infrastructure deferrals.
 - **Accepted Output:** PENDING
 - **Edited Output:** PENDING
 - **Rejected Output:** PENDING
 - **Rejection Reason:** PENDING
-- **Validation:** `git diff --check` passed. The architecture database section defines `links` and `click_events` fields with purpose, type, nullability, source, retention, constraints, and indexes; documents transaction/consistency boundaries and lifecycle exclusions; and specifies reviewed migration, runtime-validation, and rollback expectations. ARC-003 is recorded in `DECISIONS.md` and `TRACEABILITY.md`. No application source, schema, migration, or dependency files changed.
-- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 11 seconds with 4 tasks executed. JUnit XML reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are existing application regression tests; ARC-003 introduces no executable behavior.
+- **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
+- **Test Results:** Existing automated tests were not rerun because ARC-004 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
 - **Engineer Approval:** PENDING

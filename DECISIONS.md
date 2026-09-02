@@ -96,7 +96,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ### ARC-003 — Propose mapping and lifecycle data model
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Task:** ARC-003
 - **Date:** 2026-09-02
 - **Requirements:** FR-003, FR-004, FR-006, FR-007, FR-010, NFR-002, NFR-008, NFR-012, SEC-003, SEC-004, SEC-006, SEC-007, REL-001, REL-002, REL-009, REL-012, PERF-005, OBS-005, OBS-011, AC-001, AC-003 through AC-005, AC-008, AC-010 through AC-013, AC-015, AC-019, AC-022
@@ -105,7 +105,19 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Schema-evolution policy:** Use reviewed versioned migration artifacts with explicit preconditions; do not permit Hibernate destructive auto-update. Prefer runtime schema validation and tested roll-forward or reversible changes. Production backup/restore rollback claims remain deferred by RDR-004.
 - **Alternatives evaluated:** A document schema; destination-URL deduplication; storing expiration/status/idempotency fields speculatively; counter-only analytics; separate analytics storage; and application-only uniqueness. These either conflict with approved semantics or weaken transactional correctness and traceability.
 - **Open model details:** Exact migration tool, PostgreSQL collation declaration, deletion policy if mappings later become mutable, and database-versus-application authoritative clock implementation remain implementation-level choices requiring review before persistence work.
-- **Engineer disposition:** PENDING — the engineer must review the model and migration policy before schema or repository implementation is accepted.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-003 mapping and lifecycle data model on 2026-09-02. The documented implementation-level details remain subject to review within downstream persistence work.
+
+### ARC-004 — Define analytics data and processing architecture
+
+- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Task:** ARC-004
+- **Date:** 2026-09-02
+- **Requirements:** FR-007, FR-008, FR-010, NFR-002, NFR-008, SEC-006, SEC-009, REL-006, REL-012, PERF-003, OBS-005, OBS-007, OBS-011, AC-010 through AC-013, AC-015, AC-022
+- **Decision:** Keep analytics as an internal module in the modular monolith. For each successful GET resolving an active mapping, attempt one minimal append-only PostgreSQL event immediately before the redirect. Persist only link ID, UTC event time, and coarse traffic class. Bound the attempt, fail open on analytics failure, expose only authorized aggregate queries, and retain events for 90 days.
+- **Guarantees and limitations:** The design is best-effort and at-least-attempted, not exactly once. It makes no destination-arrival or unique-human claim, provides no retry, queue, buffer, replay, or read-your-click guarantee, and treats timeout outcomes as operationally ambiguous. Product analytics and operational telemetry remain separate.
+- **Alternatives evaluated:** Kafka, a PostgreSQL outbox, an in-process queue, a separate analytics service, counter-only analytics, raw-event storage, public analytics, and fail-closed redirects. These add infrastructure or weaken approved availability/privacy semantics without a demonstrated baseline failure.
+- **Infrastructure decision:** Do not add Kafka, Redis, a queue, a second datastore, or a separate service for ARC-004. Reconsider only after measured redirect-overhead failure, a durability/replay requirement, independent consumers, or deployment ownership requires it and the engineer approves a new decision.
+- **Engineer disposition:** PENDING — the engineer must review and approve the event boundary, loss tolerance, privacy transformation, and infrastructure boundary before analytics implementation.
 
 ## Decision summary
 

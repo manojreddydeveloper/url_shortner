@@ -264,6 +264,18 @@ If analytics write overhead fails the redirect objective, first consider a bound
 
 A separate service does not remove the need for event delivery, storage, privacy, or failure semantics. At current scope it adds deployment, authentication, versioning, network failure, observability, and local-development complexity. The internal module boundary preserves a future extraction seam without paying those costs now.
 
+### ARC-004 guarantees and boundaries
+
+| Concern | Baseline guarantee | Explicit limitation |
+| --- | --- | --- |
+| Click boundary | One event attempt for each successful `GET` that resolves an active mapping, immediately before the redirect response | Does not prove destination arrival or unique-human activity |
+| Delivery | Append-only PostgreSQL insert is attempted once within a bounded time budget | No retry, queue, buffering, or exactly-once guarantee; timeout outcomes are operationally ambiguous |
+| Redirect availability | Analytics failure is fail-open and never changes an otherwise successful `302` response | Event loss is accepted and must be visible through operational metrics |
+| Consistency | Successful inserts are queryable from the same authoritative datastore; analytics queries read one committed snapshot | A query may omit a just-committed event; no read-your-click guarantee |
+| Privacy boundary | User-agent classification and rate-limit identity are transient; only link ID, UTC timestamp, and coarse traffic class are persisted | No raw IP, user-agent, referrer, destination, token, or correlation ID in product analytics |
+| Retention | Events are eligible for physical deletion at or beyond 90 days, with cleanup monitored within the approved window | Backup retention and production deletion guarantees remain deferred |
+| Processing shape | Synchronous bounded capture plus direct SQL aggregation in the modular monolith | Separate consumers, replay, and independent scaling are not baseline capabilities |
+
 ## 9. Rate limiting approach
 
 ### Approved baseline translated into architecture
