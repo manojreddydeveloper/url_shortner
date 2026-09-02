@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-018
+
+- **Prompt ID:** PROMPT-018
+- **Task ID:** RED-002
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement approved HTTP redirect response semantics.
+- **Context Provided:** RED-002 in `TASKS.md`; accepted ARC-002 and RED-001; approved `302 Found`, exact `Location`, `Cache-Control: no-store`, `404`, and `503` contract.
+- **Constraints:** Execute only RED-002; support GET only; do not add analytics capture, method forwarding, caching, expiration, or lifecycle behavior; preserve stored destination representation and safe errors.
+- **Acceptance Criteria:** Active codes return 302 with exact Location and no-store; not-found/dependency outcomes map safely without Location; unsupported methods remain framework-rejected.
+- **AI Output Summary:** Added conditional `RedirectController` mapping resolver outcomes to approved redirect/error responses and focused controller tests.
+- **Files Changed:** `src/main/java/com/example/urlshortener/web/RedirectController.java`, `src/test/java/com/example/urlshortener/web/RedirectControllerTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review HTTP routing precedence, header semantics, and safe error mapping.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; `git diff --check` passed.
+- **Test Results:** BUILD SUCCESSFUL in 12 seconds; 4 actionable tasks executed. No test failures were reported.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-017
 
 - **Prompt ID:** PROMPT-017
 - **Task ID:** RED-001
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement short-code resolution and approved lifecycle outcome classification.
 - **Context Provided:** RED-001 in `TASKS.md`; approved RDR-002 expiration exclusion and redirect semantics; accepted CRT-002 persistence and current repository conventions.
 - **Constraints:** Execute only RED-001; validate ten-character Base62 input before lookup; distinguish active, not-found, and dependency failure; do not add expiration/inactive behavior excluded from baseline; do not implement HTTP redirect formatting or analytics.
 - **Acceptance Criteria:** Active mappings return stored entities; malformed/unknown codes are not found without lookup; datastore failures remain distinct; lifecycle behavior follows approved no-expiration baseline.
 - **AI Output Summary:** Added `LinkResolver` with bounded code validation, repository lookup, explicit outcomes, and datastore error classification, plus focused tests.
 - **Files Changed:** `src/main/java/com/example/urlshortener/redirect/LinkResolver.java`, `src/test/java/com/example/urlshortener/redirect/LinkResolverTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review outcome semantics and conditional activation.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed outcome semantics, datastore failure classification, conditional activation, and validation evidence and explicitly approved RED-001 on 2026-09-02.
+- **Accepted Output:** Short-code validation, authoritative resolver lookup, active/not-found/dependency-failure outcomes, and focused tests.
+- **Edited Output:** None — the engineer approved the generated implementation without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** Initial test run exposed application context failure because the repository bean is absent without a database; resolver conditional activation was added. Final `git diff --check` passed.
 - **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 13 seconds with 4 actionable tasks and no reported failures.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-016
 
