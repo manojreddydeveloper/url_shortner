@@ -112,25 +112,25 @@ Copy this template for every new material AI activity.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 10 seconds with 4 tasks executed. The generated JUnit reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These application tests are regression evidence; REQ-001 itself is a documentation and decision-record task.
 - **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
-### PROMPT-010
+### PROMPT-011
 
-- **Prompt ID:** PROMPT-010
-- **Task ID:** ARC-005
+- **Prompt ID:** PROMPT-011
+- **Task ID:** FND-001
 - **Date:** 2026-09-02
 - **Status:** GENERATED
-- **Purpose:** Define reliability failure handling, lifecycle behavior, cache policy, telemetry boundaries, and operational alert evidence.
-- **Context Provided:** ARC-005 in `TASKS.md`; approved RDR-001 through RDR-004; accepted ARC-001 through ARC-004; existing architecture/API/security/performance documents; and the Java/Spring Boot/Hibernate/PostgreSQL baseline.
-- **Constraints:** Execute only ARC-005; document bounded failure and observability behavior without implementing source, dependencies, cache, retries, queues, or tracing; preserve approved fail-open analytics and no-cache baseline; defer production recovery commitments.
-- **Acceptance Criteria:** Material failures map to client outcomes and signals; timeout/retry bounds are explicit; cache behavior is explicit; startup/readiness/liveness/shutdown/recovery are specified; telemetry is bounded and privacy-safe; fault and lifecycle test scenarios are identifiable.
-- **AI Output Summary:** Added the ARC-005 reliability/observability boundary matrix, decision record, traceability row, and security/performance cross-reference documents.
-- **Files Changed:** `docs/architecture.md`, `docs/security.md`, `docs/performance.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review required for timeout/retry limits, lifecycle behavior, cache exclusion, telemetry controls, and recovery deferrals.
+- **Purpose:** Validate and close the already-present approved project scaffold without adding feature behavior.
+- **Context Provided:** FND-001 in `TASKS.md`; accepted ARC-002 through ARC-005; existing Java 21/Gradle/Spring Boot/Hibernate foundation; repository contents; and approved dependency/ignore/setup requirements.
+- **Constraints:** Execute only FND-001; do not recreate or refactor existing scaffold; add no dependencies; do not implement URL, redirect, persistence, analytics, or reliability features; preserve existing source and tests.
+- **Acceptance Criteria:** Approved toolchain builds; dependencies are reproducible and approved; minimal tests pass; generated artifacts/secrets are ignored; setup and validation commands are documented and usable.
+- **AI Output Summary:** Audited the existing scaffold, ran a clean test build, and recorded task-level validation evidence. No source changes were required because the scaffold already satisfies the task scope.
+- **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review the pre-existing scaffold attribution and validation evidence.
 - **Accepted Output:** PENDING
 - **Edited Output:** PENDING
 - **Rejected Output:** PENDING
 - **Rejection Reason:** PENDING
-- **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
-- **Test Results:** Existing automated tests were not rerun because ARC-005 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
+- **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home clean test --rerun-tasks --no-daemon` completed successfully; repository inspection confirmed the approved wrapper, lockfile, dependency set, ignore rules, source/test structure, and README commands.
+- **Test Results:** BUILD SUCCESSFUL in 12 seconds; 5 actionable tasks executed. No test failures were reported.
 - **Engineer Approval:** PENDING
 
 ### PROMPT-003
@@ -152,6 +152,27 @@ Copy this template for every new material AI activity.
 - **Rejection Reason:** The approved approach favors deterministic behavior, bounded inputs, exact destination preservation, collision safety, redirect control, and exclusion of unspecified lifecycle functionality.
 - **Validation:** `git diff --check` passed. Consistency checks found 16 ambiguity records: exactly 6 marked approved by RDR-002 and 10 still pending. The behavior matrix contains 18 cases covering all required categories, every matrix requirement ID resolves to a defined requirement or acceptance criterion, and all 14 ADR summary entries remain `PROPOSED`. The RDR-002 boundary explicitly records that proposed API and architecture expiration text requires later reconciliation.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 11 seconds with 4 tasks executed. The generated JUnit reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These are regression tests; REQ-002 itself changes requirements documentation only.
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
+
+### PROMPT-010
+
+- **Prompt ID:** PROMPT-010
+- **Task ID:** ARC-005
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Define reliability failure handling, lifecycle behavior, cache policy, telemetry boundaries, and operational alert evidence.
+- **Context Provided:** ARC-005 in `TASKS.md`; approved RDR-001 through RDR-004; accepted ARC-001 through ARC-004; existing architecture/API/security/performance documents; and the Java/Spring Boot/Hibernate/PostgreSQL baseline.
+- **Constraints:** Execute only ARC-005; document bounded failure and observability behavior without implementing source, dependencies, cache, retries, queues, or tracing; preserve approved fail-open analytics and no-cache baseline; defer production recovery commitments.
+- **Acceptance Criteria:** Material failures map to client outcomes and signals; timeout/retry bounds are explicit; cache behavior is explicit; startup/readiness/liveness/shutdown/recovery are specified; telemetry is bounded and privacy-safe; fault and lifecycle test scenarios are identifiable.
+- **AI Output Summary:** Added the ARC-005 reliability/observability boundary matrix, decision record, traceability row, and security/performance cross-reference documents.
+- **Files Changed:** `docs/architecture.md`, `docs/security.md`, `docs/performance.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** The engineer reviewed the generated ARC-005 changes and explicitly approved them on 2026-09-02.
+- **Accepted Output:** The reliability failure matrix, timeout/retry bounds, cache exclusion, lifecycle behavior, recovery deferrals, privacy-safe telemetry, correlation, and alert objectives.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
+- **Test Results:** Existing automated tests were not rerun because ARC-005 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
 - **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-004

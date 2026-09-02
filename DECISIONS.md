@@ -121,14 +121,14 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ### ARC-005 — Define reliability and observability architecture
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Task:** ARC-005
 - **Date:** 2026-09-02
 - **Requirements:** NFR-002, NFR-005, NFR-006, NFR-008, REL-001 through REL-012, PERF-006, OBS-001 through OBS-011, AC-009, AC-012, AC-015, AC-016, AC-018, AC-019
 - **Decision:** Use bounded dependency time budgets with no automatic retries, no baseline cache, PostgreSQL-required readiness, dependency-independent liveness, and a 30-second graceful-drain window. Emit structured privacy-safe logs, bounded metrics, in-process correlation, and alerts for approved latency, error, dependency, analytics-loss, saturation, abuse, and cleanup objectives. Defer backups/RTO/RPO and distributed tracing until separately approved.
 - **Failure matrix:** Database failure is a distinguishable `503`; analytics append failure remains fail-open for redirects; cache behavior is not applicable in the baseline; startup remains unready until PostgreSQL is healthy; shutdown drains in-flight work without buffered-analytics guarantees.
 - **Alternatives evaluated:** Dependency retries, stale/negative caching, cache-aside availability reads, durable analytics buffering, database-backed rate limiting, mandatory distributed tracing, and production recovery commitments. These add failure coupling or commitments not required by the approved prototype envelope.
-- **Engineer disposition:** PENDING — the engineer must review timeout/retry bounds, lifecycle behavior, cache exclusion, telemetry controls, and recovery deferrals before reliability implementation.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-005 reliability and observability architecture on 2026-09-02. The documented implementation-level details remain subject to review during reliability implementation.
 
 ## Decision summary
 
