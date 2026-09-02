@@ -34,7 +34,8 @@ All requirement statuses were initialized as **NOT STARTED**.
 | CRT-003 | Secure random ten-character case-sensitive Base62 generation, rejection sampling, and bounded collision-attempt policy are implemented and tested. | `ShortCodeGenerator.java`, `ShortCodeGeneratorTest.java`; validation and engineer approval recorded in `PROMPT_LOG.md` | ACCEPTED |
 | CRT-004 | URL creation request validation, durable persistence orchestration, token issuance, configured-base-URL construction, and safe API errors are implemented and tested. | `LinkCreationService.java`, `LinkCreationController.java`, creation tests, and configuration; validation and engineer approval recorded in `PROMPT_LOG.md` | ACCEPTED |
 | RED-001 | Short-code format validation, authoritative lookup, active/not-found classification, and distinct datastore-failure outcome are implemented and tested. | `LinkResolver.java`, `LinkResolverTest.java`; validation and engineer approval recorded in `PROMPT_LOG.md` | ACCEPTED |
-| RED-002 | Approved GET redirect response, `Location`, `Cache-Control: no-store`, not-found, and dependency-failure mappings are implemented and tested. | `RedirectController.java`, `RedirectControllerTest.java`; validation recorded in `PROMPT_LOG.md` | VERIFIED |
+| RED-002 | Approved GET redirect response, `Location`, `Cache-Control: no-store`, not-found, and dependency-failure mappings are implemented and tested. | `RedirectController.java`, `RedirectControllerTest.java`; validation and engineer approval recorded in `PROMPT_LOG.md` | ACCEPTED |
+| ANL-001 | Approved active-GET click boundary, transient bot classification, minimal event fields, and fail-open redirect capture are implemented and tested. | `ClickEvent.java`, `AnalyticsCapture.java`, redirect integration, and tests; validation recorded in `PROMPT_LOG.md` | VERIFIED |
 
 ## Functional Requirements
 
