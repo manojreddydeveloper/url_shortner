@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-017
+
+- **Prompt ID:** PROMPT-017
+- **Task ID:** RED-001
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement short-code resolution and approved lifecycle outcome classification.
+- **Context Provided:** RED-001 in `TASKS.md`; approved RDR-002 expiration exclusion and redirect semantics; accepted CRT-002 persistence and current repository conventions.
+- **Constraints:** Execute only RED-001; validate ten-character Base62 input before lookup; distinguish active, not-found, and dependency failure; do not add expiration/inactive behavior excluded from baseline; do not implement HTTP redirect formatting or analytics.
+- **Acceptance Criteria:** Active mappings return stored entities; malformed/unknown codes are not found without lookup; datastore failures remain distinct; lifecycle behavior follows approved no-expiration baseline.
+- **AI Output Summary:** Added `LinkResolver` with bounded code validation, repository lookup, explicit outcomes, and datastore error classification, plus focused tests.
+- **Files Changed:** `src/main/java/com/example/urlshortener/redirect/LinkResolver.java`, `src/test/java/com/example/urlshortener/redirect/LinkResolverTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review outcome semantics and conditional activation.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** Initial test run exposed application context failure because the repository bean is absent without a database; resolver conditional activation was added. Final `git diff --check` passed.
+- **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 13 seconds with 4 actionable tasks and no reported failures.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-016
 
 - **Prompt ID:** PROMPT-016
 - **Task ID:** CRT-004
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement the approved URL creation API and orchestration.
 - **Context Provided:** CRT-004 in `TASKS.md`; accepted ARC-002, CRT-001, CRT-002, and CRT-003; existing configuration, error, persistence, validator, and generator components.
 - **Constraints:** Execute only CRT-004; preserve non-idempotent duplicate behavior, configured public base URL, one-time token response, durable save-before-response, bounded collision retries, safe errors, and no redirect/analytics implementation.
 - **Acceptance Criteria:** Valid requests return `201` with approved fields; invalid requests persist nothing; duplicate requests create independent mappings; collision exhaustion maps to `500`; datastore failures cannot return success; base URL is trusted configuration only.
 - **AI Output Summary:** Added creation service with token hashing, durable repository save, collision retry handling, and API controller with request/response models and safe error mapping.
 - **Files Changed:** `src/main/java/com/example/urlshortener/url/LinkCreationService.java`, `src/main/java/com/example/urlshortener/web/LinkCreationController.java`, `src/test/java/com/example/urlshortener/url/LinkCreationServiceTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review API wire behavior, token handling, collision classification, and conditional bean lifecycle.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed API wire behavior, token handling, collision classification, conditional bean lifecycle, and validation evidence and explicitly approved CRT-004 on 2026-09-02.
+- **Accepted Output:** URL creation service/controller, approved request/response behavior, token hashing, durable-save ordering, bounded collision handling, and focused tests.
+- **Edited Output:** None — the engineer approved the generated implementation without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** Initial test run failed on application context construction and mocked collision retry behavior; fixes added explicit constructor injection and conditional controller/service activation plus deterministic retry stubbing. Final `git diff --check` passed.
 - **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds with 4 actionable tasks and no reported failures.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-015
 
