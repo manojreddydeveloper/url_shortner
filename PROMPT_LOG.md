@@ -117,21 +117,21 @@ Copy this template for every new material AI activity.
 - **Prompt ID:** PROMPT-011
 - **Task ID:** FND-001
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Validate and close the already-present approved project scaffold without adding feature behavior.
 - **Context Provided:** FND-001 in `TASKS.md`; accepted ARC-002 through ARC-005; existing Java 21/Gradle/Spring Boot/Hibernate foundation; repository contents; and approved dependency/ignore/setup requirements.
 - **Constraints:** Execute only FND-001; do not recreate or refactor existing scaffold; add no dependencies; do not implement URL, redirect, persistence, analytics, or reliability features; preserve existing source and tests.
 - **Acceptance Criteria:** Approved toolchain builds; dependencies are reproducible and approved; minimal tests pass; generated artifacts/secrets are ignored; setup and validation commands are documented and usable.
 - **AI Output Summary:** Audited the existing scaffold, ran a clean test build, and recorded task-level validation evidence. No source changes were required because the scaffold already satisfies the task scope.
 - **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review the pre-existing scaffold attribution and validation evidence.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the scaffold attribution and validation evidence and explicitly approved FND-001 on 2026-09-02.
+- **Accepted Output:** The existing approved project scaffold, dependency lock/reproducibility metadata, minimal tests, ignore rules, and setup commands.
+- **Edited Output:** None — the engineer approved the generated task records without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home clean test --rerun-tasks --no-daemon` completed successfully; repository inspection confirmed the approved wrapper, lockfile, dependency set, ignore rules, source/test structure, and README commands.
 - **Test Results:** BUILD SUCCESSFUL in 12 seconds; 5 actionable tasks executed. No test failures were reported.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-003
 
@@ -281,6 +281,28 @@ Copy this template for every new material AI activity.
 - **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-009
+
+### PROMPT-012
+
+- **Prompt ID:** PROMPT-012
+- **Task ID:** FND-002
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Validate the existing cross-cutting service foundation for configuration, safe errors, request correlation, and structured logging.
+- **Context Provided:** FND-002 in `TASKS.md`; accepted FND-001 and ARC-001 through ARC-005; existing implementation and tests; approved API/security/observability requirements.
+- **Constraints:** Execute only FND-002; do not add dependencies or product behavior; do not weaken tests or refactor unrelated code; preserve approved safe-error and privacy boundaries.
+- **Acceptance Criteria:** Invalid configuration fails early without secrets; error envelopes are safe and contractual; correlation IDs are validated/propagated; logs are structured and redacted; no creation, redirect, or analytics behavior is present.
+- **AI Output Summary:** Audited the existing FND-002 implementation and tests and ran the relevant Gradle test suite. No source changes were required.
+- **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review the existing implementation attribution and validation evidence.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; implementation inspection confirmed configuration, error, correlation, and logging boundaries.
+- **Test Results:** BUILD SUCCESSFUL in 10 seconds; 4 actionable tasks executed. No test failures were reported.
+- **Engineer Approval:** PENDING
+
 
 - **Prompt ID:** PROMPT-009
 - **Task ID:** ARC-004
