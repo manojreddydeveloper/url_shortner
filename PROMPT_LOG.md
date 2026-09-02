@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-015
+
+- **Prompt ID:** PROMPT-015
+- **Task ID:** CRT-003
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement approved secure random short-code generation and bounded collision retry policy.
+- **Context Provided:** CRT-003 in `TASKS.md`; approved AMB-002/RDR-002 policy and ARC-003 uniqueness model; accepted CRT-002 persistence and current Java conventions.
+- **Constraints:** Execute only CRT-003; use ten-character case-sensitive Base62 codes, cryptographically secure randomness with rejection sampling, maximum six total attempts, no logging of candidates, and no unrelated API/persistence orchestration.
+- **Acceptance Criteria:** Codes match the approved alphabet/length; randomness source is secure; retry bound is explicit; tests cover format, volume, deterministic rejection sampling, and exhaustion boundary.
+- **AI Output Summary:** Added `ShortCodeGenerator` with rejection-sampled `SecureRandom` output and bounded collision-attempt policy, plus focused property-style and deterministic tests.
+- **Files Changed:** `src/main/java/com/example/urlshortener/url/ShortCodeGenerator.java`, `src/test/java/com/example/urlshortener/url/ShortCodeGeneratorTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review entropy implementation, collision integration seam, and exhaustion behavior.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; `git diff --check` passed.
+- **Test Results:** BUILD SUCCESSFUL in 11 seconds; 4 actionable tasks executed. No test failures were reported.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-014
 
 - **Prompt ID:** PROMPT-014
 - **Task ID:** CRT-002
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement authoritative mapping persistence using the engineer-approved Flyway migration mechanism.
 - **Context Provided:** CRT-002 in `TASKS.md`; accepted ARC-003 data model, ARC-005 reliability policy, CRT-001 validator, and Java/Spring Boot/Hibernate/PostgreSQL foundation; engineer approval to use Flyway.
 - **Constraints:** Execute only CRT-002; use PostgreSQL as authority; add no lifecycle, owner, tenant, idempotency, or mutable-destination fields; do not implement code generation or API orchestration; preserve migration validation and no destructive Hibernate auto-update.
 - **Acceptance Criteria:** Mapping schema and JPA model match ARC-003; short-code uniqueness is database-enforced; repository lookup is explicit; Flyway migration is versioned and reproducible; tests pass without weakening existing coverage.
 - **AI Output Summary:** Added Flyway dependency/lock entry, Hibernate validation settings, `links` entity/repository, V1 migration with constraints, and focused entity test.
 - **Files Changed:** `build.gradle`, `gradle.lockfile`, `src/main/resources/application.properties`, `src/main/java/com/example/urlshortener/persistence/LinkEntity.java`, `src/main/java/com/example/urlshortener/persistence/LinkRepository.java`, `src/main/resources/db/migration/V1__create_links.sql`, `src/test/java/com/example/urlshortener/persistence/LinkEntityTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review migration SQL, PostgreSQL collation behavior, and repository failure classification before acceptance.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the migration SQL, PostgreSQL collation caveat, repository boundary, and validation evidence and explicitly approved CRT-002 on 2026-09-02.
+- **Accepted Output:** Flyway migration, approved `links` JPA mapping, short-code lookup repository, schema constraints, lock metadata, and passing unit/build validation.
+- **Edited Output:** None — the engineer approved the generated implementation without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** Initial test run exposed the expected dependency-lock failure; Flyway lock metadata was regenerated with `dependencies --write-locks`, then the full test suite was rerun successfully. `git diff --check` passed.
 - **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 15 seconds with 4 actionable tasks and no reported failures. No live PostgreSQL integration test was run.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-013
 
