@@ -9,7 +9,7 @@
 
 This proposal chooses the smallest architecture that can satisfy the currently normalized requirements. Major choices are recorded as proposed decisions in `DECISIONS.md`; they are not approved merely because they appear here.
 
-Several product and scale requirements remain pending. Values such as URL length, rate limits, retention, expiry limits, and service-level targets are configuration or decision placeholders until the engineer approves them.
+REQ-001 through REQ-004 establish the functional and prototype quality baseline. Exact wire schemas remain ARC-002 work, persistence details remain ARC-003 work, and deployment-specific telemetry routing remains ARC-005 work.
 
 ## Architecture principles
 
@@ -21,6 +21,19 @@ Several product and scale requirements remain pending. Values such as URL length
 6. Add Redis, queues, services, or replicas only when an approved requirement or measured result justifies them.
 7. Make external boundaries replaceable and testable without creating speculative internal frameworks.
 
+### Proposed technical stack
+
+| Concern | Proposed choice | Rationale and boundary |
+| --- | --- | --- |
+| Language/runtime | Java 21 (or the engineer-approved project JDK) | Strong typing and mature Spring ecosystem; the runtime version must match the build environment. |
+| Build | Gradle with the existing wrapper and dependency lock | Reproducible builds and no build-tool installation requirement. |
+| Application framework | Spring Boot | One deployable HTTP application with configuration, lifecycle, health, and test integration. |
+| Persistence | Spring Data JPA/Hibernate against PostgreSQL | Transactional mapping creation, case-sensitive uniqueness, indexed lookup, and analytics range queries. Hibernate is an implementation detail behind repository boundaries. |
+| Baseline stateful services | One PostgreSQL datastore | Authoritative mappings and minimal click events; no Redis, Kafka, queue, or second datastore. |
+| Deployment | Single-region, single-application-instance prototype | Matches the approved validation envelope; replicas and multi-region operation require a new decision. |
+
+The selected dependency set is intentionally limited to the existing Java/Spring/Gradle foundation plus the approved PostgreSQL/Hibernate persistence path. No dependency is installed by ARC-001. The engineer must approve this proposed stack before project-foundation dependency changes are accepted.
+
 ## 1. Component architecture
 
 ### Proposed deployment
@@ -31,13 +44,11 @@ flowchart LR
     Edge[Trusted Edge or Load Balancer\nTLS, request limits]
     App[URL Shortener Application\nModular Monolith]
     DB[(PostgreSQL\nAuthoritative Data)]
-    Redis[(Redis\nOptional, not baseline)]
     Telemetry[Approved Log / Metric Sink]
 
     Client -->|HTTPS API or short URL| Edge
     Edge -->|Validated proxy metadata| App
     App -->|Mapping and analytics SQL| DB
-    App -.->|Cache / distributed limits only if approved| Redis
     App -->|Privacy-safe telemetry| Telemetry
 ```
 
@@ -69,15 +80,14 @@ The modules are logical boundaries inside one process and one repository. They a
 2. The API layer assigns or validates a correlation ID and applies the approved creation rate limit.
 3. The request body is decoded under a strict body-size and content-type policy.
 4. The URL-policy module parses and validates the destination. It does not fetch the destination.
-5. If an optional expiration is approved, the lifecycle policy validates it against the configured bounds.
-6. The application generates:
+5. The application generates:
    - a candidate ten-character Base62 short code; and
-   - a 256-bit per-link analytics management token, if the proposed token-based analytics access model is approved.
-7. In a database transaction, the repository inserts the mapping and the one-way hash of the analytics token.
-8. A unique-code conflict causes a new candidate and bounded retry. No existing row is overwritten.
-9. Other database failures produce a retryable service error; the API never returns false success.
-10. The API returns the proposed `201 Created` response using a configured public base URL. The plaintext analytics token is returned only in this response and is not stored or logged.
-11. Operational metrics and privacy-safe logs record the outcome without the raw destination, management token, or client IP.
+   - a 256-bit per-link analytics management token under the approved per-link access model.
+6. In a database transaction, the repository inserts the mapping and the one-way hash of the analytics token.
+7. A unique-code conflict causes a new candidate and bounded retry. No existing row is overwritten.
+8. Other database failures produce `503 Service Unavailable`; the API never returns false success or treats an uncertain write as a duplicate.
+9. The API returns the proposed `201 Created` response using a configured public base URL. The plaintext analytics token is returned only in this response and is not stored or logged.
+10. Operational metrics and privacy-safe logs record the outcome without the raw destination, management token, or client IP.
 
 ### Duplicate and retry behavior
 
@@ -89,19 +99,17 @@ If retry-safe creation becomes required, add an explicit idempotency-key contrac
 
 1. The edge forwards `GET /{code}` to the application. Static API and health routes take precedence over the fixed-length code route.
 2. The HTTP layer rejects codes that do not match the approved format before a database or cache lookup.
-3. If Redis caching is later approved, the resolver attempts a cache lookup. The baseline skips this step.
-4. The repository queries PostgreSQL by the case-sensitive short code.
-5. The resolver distinguishes:
+3. The repository queries PostgreSQL by the case-sensitive short code; the baseline has no cache lookup.
+4. The resolver distinguishes:
    - active mapping;
    - unknown mapping;
-   - expired mapping; and
    - dependency failure.
-6. For an active mapping, the analytics module attempts a minimal best-effort event insert with a bounded time budget.
-7. Analytics success or failure is recorded operationally. Under the proposed fail-open policy, analytics failure does not block the redirect.
-8. The handler returns proposed `302 Found` with the stored destination in `Location` and the approved cache-control headers.
-9. Unknown codes return `404 Not Found`; expired codes return `410 Gone`; database failure returns `503 Service Unavailable` unless a future approved cache-outage policy provides a safe hit.
+5. For an active mapping, the analytics module attempts a minimal best-effort event insert with a bounded time budget.
+6. Analytics success or failure is recorded operationally. Under the approved fail-open policy, analytics failure does not block the redirect.
+7. The handler returns `302 Found` with the stored destination in `Location` and `Cache-Control: no-store`.
+8. Unknown or malformed codes return `404 Not Found` without `Location`; database failure returns `503 Service Unavailable`.
 
-The service counts reaching step 6 for an active mapping as the proposed click boundary. It does not claim that the client reached the destination.
+The service counts reaching the analytics-capture step for an active mapping as the approved click boundary. It does not claim that the client reached the destination.
 
 ## 4. Data flow
 
@@ -155,14 +163,11 @@ SQLite is simpler locally but has different concurrency and production behavior.
 | `destination_url` | text | Not null; validated length and content before insert; database length check if approved |
 | `analytics_token_hash` | fixed binary hash | Not null if per-link analytics tokens are approved; plaintext is never stored |
 | `created_at` | timestamp with time zone | Not null; database or approved authoritative UTC time |
-| `expires_at` | timestamp with time zone | Nullable; only present if optional expiration is approved; must be later than creation |
 
 Indexes:
 
 - Unique index on `short_code`; this is the collision authority.
-- Optional index on `expires_at` only if expiration cleanup or lifecycle queries require it.
-
-The baseline does not include mutable destinations, soft deletion, custom aliases, accounts, tenants, or a status column because those capabilities are not approved requirements.
+The baseline does not include expiration state, mutable destinations, soft deletion, custom aliases, accounts, tenants, or a status column because those capabilities are not approved requirements.
 
 ### `click_events`
 
@@ -196,7 +201,7 @@ This append-only, minimal event table is intentionally simple. It supports total
 - Preserve case through routing, proxies, database collation, and lookup.
 - Avoid modulo bias through an approved library or rejection-sampling implementation.
 - Attempt the insert directly; on the specific unique-code constraint violation, generate a new candidate.
-- Stop after five attempts and return an internal availability error. Both length and retry count remain proposed configuration decisions.
+- Stop after five attempts and return an internal availability error. The ten-character length and five-retry bound are approved for the one-million-mapping prototype envelope.
 - Never overwrite, update, or lock the row that already owns a code.
 
 Ten Base62 characters provide `62^10`, approximately `8.39 × 10^17`, possible codes and about 59.5 bits of code-space entropy. The unique constraint remains mandatory because probability is not a correctness mechanism.
@@ -215,7 +220,7 @@ Ten Base62 characters provide `62^10`, approximately `8.39 × 10^17`, possible c
 
 ### Baseline decision
 
-Redis is **not required in the baseline**. No approved scale or multi-instance requirement currently justifies another stateful dependency.
+Redis is **not required in the baseline**. The approved single-instance scale envelope does not justify another stateful dependency.
 
 ### Conditional cache use
 
@@ -238,7 +243,7 @@ Redis is not proposed as the source of truth, primary analytics store, distribut
 
 ## 8. Analytics architecture
 
-### Proposed baseline
+### Approved baseline translated into architecture
 
 Analytics remains a module within the main application and uses the same PostgreSQL database.
 
@@ -261,15 +266,15 @@ A separate service does not remove the need for event delivery, storage, privacy
 
 ## 9. Rate limiting approach
 
-### Proposed baseline
+### Approved baseline translated into architecture
 
 - Apply limits to link creation and analytics retrieval because they are resource-intensive and abuse-sensitive.
-- Do not apply an aggressive application-level limit to redirect traffic until an abuse or capacity target is approved; coarse edge protection may still apply.
+- Do not apply an application-level redirect quota in the single-instance baseline; coarse edge protection may still apply.
 - For a single application instance, use a bounded in-memory token bucket with expiring entries.
 - Derive client identity only from the direct peer or trusted proxy chain configured by the operator.
-- If IP-based identity is approved, use raw IP only transiently and store an HMAC-derived short-lived key.
+- Use the direct peer or explicitly trusted proxy identity, derive a keyed pseudonymous in-memory key, and expire idle state after 15 minutes. Never persist or log raw IP.
 - Return `429 Too Many Requests` and `Retry-After` when the approved limit is exceeded.
-- Make capacity, refill rate, burst, and state-retention period external configuration with approved safe bounds.
+- Use capacity 20/refill 10 per minute for creation and capacity 60/refill 60 per minute per analytics token, with bounded `Retry-After`; multi-instance enforcement requires a new decision.
 
 ### Scaling tradeoff
 
@@ -323,9 +328,9 @@ Planned bounded metrics include:
 
 - requests and duration by normalized route, method, status class, and outcome;
 - creation success, validation rejection, collision retry, and datastore failure;
-- redirect active, unknown, expired, rate-limited, and dependency-failed outcomes;
+- redirect active, unknown, rate-limited, and dependency-failed outcomes (expired and disabled states are absent from the baseline);
 - database query duration, timeout, error, and connection-pool saturation;
-- Redis hit, miss, error, and fallback only if Redis is approved;
+- no cache metrics in the baseline (Redis metrics only if a later decision approves Redis);
 - analytics event attempted, stored, failed, timed out, and queried;
 - rate-limit allow and reject counts;
 - readiness and process lifecycle state.
@@ -347,10 +352,8 @@ In-process correlation is required. Distributed tracing is not a baseline depend
 
 - Liveness indicates that the process can execute, not that every dependency is available.
 - Readiness indicates that the instance can safely serve approved traffic; PostgreSQL is expected to be required in the no-cache baseline.
-- Alerts should cover service-objective violations, database failures, analytics loss, unusual collision rate, rate-limit spikes, and optional cache fallback load.
-- Alert thresholds, routing, and ownership require approved operating targets.
-
-`TRACEABILITY.md` correctly identifies that `TASKS.md` currently lacks dedicated implementation tasks for core request metrics and alert rules. Those task gaps must be fixed before Phase 2.
+- Alerts cover the RDR-004 thresholds for unexpected 5xx, latency, readiness, datastore failures, analytics loss, rate limiting, collision retries/exhaustion, saturation, and analytics deletion lag. Routing and ownership remain deployment-specific.
+- OBS-IMPL-001 in `TASKS.md` owns implementation and synthetic validation of these metrics and alerts.
 
 ## 12. Security boundaries
 
@@ -442,4 +445,4 @@ Architecture expansion requires a measured or approved trigger:
 
 ## Approval gate
 
-Before Phase 2 implementation, the engineer must approve, modify, or reject the proposed decisions in `DECISIONS.md`, resolve the blocking API and operating parameters, and add the missing observability implementation tasks identified by traceability review.
+Before project-foundation implementation, the engineer must approve, modify, or reject the ARC-001 proposals in `DECISIONS.md`. ARC-002, ARC-003, ARC-004, and ARC-005 remain subsequent architecture gates; no source implementation or dependency installation is authorized by this document.

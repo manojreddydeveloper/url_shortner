@@ -4,7 +4,7 @@ Production-oriented URL shortener prototype. The project is being implemented as
 
 ## Current scope
 
-FND-001 provides only the buildable project foundation:
+FND-001 provides the buildable project foundation:
 
 - Java 21
 - Gradle 9.7.1 wrapper
@@ -14,7 +14,19 @@ FND-001 provides only the buildable project foundation:
 - PostgreSQL JDBC driver at runtime
 - Spring Boot test support
 
-No URL creation, redirect, persistence mapping, analytics, rate limiting, or other product behavior is implemented yet.
+FND-002 adds foundational configuration validation, safe API error envelopes, request correlation, and structured JSON logging. No URL creation, redirect, persistence mapping, analytics, rate limiting, or other product behavior is implemented yet.
+
+## Foundational configuration
+
+Application startup requires a public base URL supplied by trusted deployment configuration. Spring Boot maps the environment variable below to `url-shortener.public-base-url`:
+
+```shell
+export URL_SHORTENER_PUBLIC_BASE_URL=https://sho.rt
+```
+
+The value must be an absolute HTTP or HTTPS origin without credentials, a non-root path, a query, or a fragment. Invalid or missing values stop startup with a diagnostic that does not include the configured value.
+
+Application logs use structured JSON with service identity and operation, outcome, and correlation fields where applicable. `APP_VERSION` supplies the deployed service version and defaults to `development` locally. Requests accept a safe `X-Request-ID` containing 1–64 ASCII letters, digits, periods, underscores, or hyphens; otherwise the application generates a new identifier. The identifier is returned in the response and included in request-scoped logging context.
 
 ## Prerequisites
 
@@ -45,4 +57,4 @@ Run the minimal automated test independently:
 ./gradlew test
 ```
 
-The application is packaged by the build. Runtime database configuration and startup policy belong to a later approved task and are intentionally not defined by FND-001.
+The application is packaged by the build. Runtime database configuration belongs to a later approved task and is intentionally not defined yet.

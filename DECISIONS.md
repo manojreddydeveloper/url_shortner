@@ -32,6 +32,56 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Boundary:** This decision approves capability scope only. It does not resolve AMB-001 through AMB-016, approve assumptions, establish non-functional targets, approve any ADR below, authorize dependencies, or approve implementation output.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the REQ-001 documentation changes on 2026-09-02.
 
+### RDR-002 — Approve URL and short-link behavior
+
+- **Status:** APPROVED
+- **Task:** REQ-002
+- **Date:** 2026-09-02
+- **Requirements:** FR-001 through FR-006, FR-009, FR-010, NFR-005, SEC-001 through SEC-004, SEC-012, REL-002, REL-005, REL-007, REL-009, REL-012, AC-001 through AC-008
+- **Decision:** Adopt the AMB-001 through AMB-006 interpretations and normative behavior matrix in `ENGINEERING_PLAN.md`: structurally validate and exactly preserve bounded HTTP/HTTPS destinations without fetching them; use ten-character case-sensitive random Base62 codes with datastore-enforced uniqueness and five collision retries after the initial candidate; create a new mapping for duplicate ordinary requests; provide no baseline idempotency; exclude expiration; and use non-cacheable `302 Found` redirects for successful GET resolution.
+- **Rationale:** These policies provide deterministic and testable creation and redirect behavior, avoid normalization and deduplication privacy risks, bound hostile inputs, prevent collision overwrite, retain control of redirect traffic, and omit lifecycle functionality not required by the assignment.
+- **Alternatives rejected for this baseline:** Other URL schemes, credential-bearing or control-containing destinations, destination canonicalization, destination deduplication, implicit retry safety, expiration, sequential or destination-derived codes, permanent redirects, and cacheable redirect responses.
+- **Boundary:** RDR-004 later confirmed the ten-character length for the one-million-mapping prototype envelope; a materially larger scale requires reassessment. Exact request/response schemas and unspecified method errors remain ARC-002 work. The approved expiration exclusion controls over optional-expiration text in the still-proposed ADR-007 and proposed API/architecture documents; those proposals must be reconciled before approval. No ADR, dependency, or source implementation is approved by this decision.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the REQ-002 documentation changes on 2026-09-02.
+
+### RDR-003 — Approve analytics, privacy, access, and failure semantics
+
+- **Status:** APPROVED
+- **Task:** REQ-003
+- **Date:** 2026-09-02
+- **Requirements:** FR-007, FR-008, FR-009, NFR-008, SEC-006, SEC-007, SEC-009, SEC-010, REL-006, REL-012, PERF-003, OBS-005, OBS-007, OBS-011, AC-010 through AC-013, AC-015
+- **Decision:** Adopt the AMB-007 through AMB-010, AMB-014, and AMB-016 interpretations and normative matrices in `ENGINEERING_PLAN.md`. Count each successful GET redirect-path request; preserve suspected automation as a separate heuristic class; store only link ID, UTC time, and coarse traffic class; expose protected total and daily aggregates; retain events for 90 days; use a one-time 256-bit per-link bearer token whose SHA-256 hash is stored; and fail open without retry or buffering when analytics append fails.
+- **Rationale:** The policy supplies testable analytics while minimizing personal data, preventing public analytics disclosure, keeping redirect availability independent of analytics, and avoiding accounts, queues, and exactly-once claims not required by the assignment.
+- **Alternatives rejected for this baseline:** Public analytics, accounts or tenancy, raw-event access, unique-human claims, dropping suspected bots, storing request metadata, destination-arrival claims, fail-closed redirects, event retries, in-memory buffering, durable queues, and exactly-once delivery.
+- **Boundary:** RDR-004 later approved analytics append/query targets, rate limits, expected event volume, and cleanup alerting while explicitly deferring production availability and backup retention. Exact wire schemas remain ARC-002 work, and datastore/process topology remains architecture work. The approved policy controls over conflicting placeholders in the proposed API and architecture documents, which must be reconciled before approval. No ADR, dependency, or source implementation is approved by this decision.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the REQ-003 documentation changes on 2026-09-02.
+
+### RDR-004 — Approve non-functional targets and requirements baseline
+
+- **Status:** APPROVED
+- **Task:** REQ-004
+- **Date:** 2026-09-02
+- **Requirements:** NFR-001 through NFR-012, SEC-005, SEC-008, SEC-011, SEC-013, REL-001, REL-003, REL-004, REL-007, REL-008, REL-010, REL-011, PERF-001 through PERF-008, OBS-001 through OBS-011, AC-009, AC-014, AC-016 through AC-022; confirms RDR-001 through RDR-003
+- **Decision:** Adopt the REQ-004 operating envelope, control/failure policy, operational objectives, alert thresholds, and requirements-to-acceptance coverage in `ENGINEERING_PLAN.md`. Validate a single-region, single-instance prototype at one million mappings and ten million retained events; require the documented mixed and peak throughput, percentile latency, and error objectives; use no cache or dependency retry; apply the approved creation and analytics rate limits; distinguish datastore failure as unavailable; and use bounded dependency, lifecycle, overload, and observability behavior.
+- **Explicit deferrals:** Contractual monthly availability, production backup/restore, RTO, RPO, cloud cost, multi-region operation, and production-data acceptance. These require new engineer decisions before production deployment or production data.
+- **Infrastructure boundary:** No cache, Redis, Kafka, queue, microservice, separate analytics service, or distributed rate-limit state is required by this baseline. Architecture may select one application framework and one authoritative datastore only after comparing approved alternatives. Additional infrastructure requires measured failure against an approved target and a new decision.
+- **Rationale:** The selected envelope is large enough to exercise concurrency, data cardinality, failures, privacy, and performance while remaining a bounded assessment prototype. Explicit deferrals prevent prototype evidence from being represented as a production commitment.
+- **Task-gap disposition:** Add OBS-IMPL-001 to own bounded request/creation/redirect metrics and alert definitions previously identified as gaps for OBS-001 through OBS-003 and OBS-009.
+- **Engineer disposition:** APPROVED — the engineer reviewed and approved the generated REQ-004 documentation changes on 2026-09-02.
+
+### ARC-001 — Propose system boundaries and technical stack
+
+- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Task:** ARC-001
+- **Date:** 2026-09-02
+- **Requirements:** NFR-002, NFR-006, NFR-007, NFR-009, PERF-004, PERF-008, REL-001, REL-003, REL-004, SEC-005, SEC-008, SEC-013, OBS-001 through OBS-011
+- **Decision:** Use one Java/Spring Boot application built with Gradle, organized as a modular monolith with explicit HTTP, configuration, URL-policy, creation, code-generation, mapping-repository, resolver, redirect, analytics, access-control, rate-limit, lifecycle, and observability boundaries. Use Hibernate/JPA with one PostgreSQL datastore as the authoritative source for mappings and minimal analytics events. Validate the prototype as one application instance in one region. Do not add Redis, Kafka, a queue, microservices, a separate analytics service, a separate ID-generation service, or distributed locking in the baseline.
+- **Alternatives evaluated:** A single unstructured application; microservices; SQLite or a document database; a separate analytics service; Kafka or an outbox; Redis cache/shared limiter; a separate ID service; and distributed locking. These alternatives add operational, network, coordination, or consistency cost without an approved requirement or measured failure of the baseline envelope.
+- **Dependency rationale:** Java, Gradle, Spring Boot, Hibernate/JPA, and PostgreSQL each have a direct role in the approved prototype. Redis, Kafka, queues, and additional services have no baseline role and remain conditional evolution options only.
+- **Trust and data boundary:** Clients and forwarding metadata are untrusted until validated; PostgreSQL is authoritative but failure must remain distinguishable from not-found; analytics and operational telemetry remain separate and privacy-safe; configured public base URL and explicitly trusted proxy addresses are the only trusted deployment inputs.
+- **Revisit triggers:** Add infrastructure or split a service only after measured failure against an approved target, a new deployment/ownership requirement, or a new engineer-approved durability, replay, global-rate-limit, or multi-region requirement.
+- **Engineer disposition:** PENDING — the engineer must review this architecture proposal before ARC-002 through ARC-005 or project-foundation dependency changes are accepted.
+
 ## Decision summary
 
 | ID | Topic | Proposed outcome | Status |

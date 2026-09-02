@@ -461,18 +461,38 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Title:** Implement health, startup, shutdown, and approved recovery behavior
 - **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: No
 - **Intent:** Make the service safe to operate and terminate under approved dependency and buffered-work policies.
-- **Description:** Implement distinct readiness and liveness, startup checks, graceful request draining, analytics-buffer shutdown, and backup or restore hooks only if approved.
+- **Description:** Implement distinct readiness and liveness, startup checks, and a 30-second graceful request drain. The approved baseline has no analytics buffer and defers backup or restore behavior; adding either requires a new decision.
 - **Dependencies:** REL-IMPL-001, REL-IMPL-002 if applicable, ARC-005
 - **Acceptance Criteria:**
   1. Liveness and readiness reflect their approved meanings.
   2. Startup cannot accept unsafe traffic before required dependencies are ready.
-  3. Shutdown handles in-flight requests and buffered analytics as approved.
-  4. Recovery behavior, if in scope, meets its documented procedure and objectives.
-- **Test Requirements:** Add process-lifecycle, dependency-readiness, graceful-shutdown, forced-termination, buffered-work, and recovery tests as applicable.
+  3. Shutdown stops new traffic and gives active requests at most 30 seconds to drain; no analytics-buffer behavior is introduced.
+  4. Readiness recovers within 30 seconds after the required datastore becomes healthy in the approved reference environment.
+- **Test Requirements:** Add process-lifecycle, dependency-readiness and recovery, graceful-shutdown, forced-termination, and no-buffer conformance tests.
 - **Security Considerations:** Health output must not reveal internals; backup and restore material must use approved protection and access control.
 - **Failure Scenarios:** Instance remains ready while unsafe; shutdown loses events outside tolerance; health endpoint discloses configuration.
-- **Impacted Components:** Future health handlers, process lifecycle, analytics buffering, deployment configuration, and recovery procedures
+- **Impacted Components:** Future health handlers, process lifecycle, deployment configuration, and lifecycle tests
 - **Human Approval Required:** Yes — engineer review against REL-010 and REL-011 is required.
+
+### OBS-IMPL-001 — Implement operational metrics and alert definitions
+
+- **Task ID:** OBS-IMPL-001
+- **Title:** Implement operational metrics and alert definitions
+- **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: No
+- **Intent:** Make approved service outcomes, dependency health, lifecycle state, and material failures measurable without leaking sensitive or high-cardinality data.
+- **Description:** Implement bounded request, creation, redirect, analytics, dependency, rate-limit, saturation, and lifecycle metrics using the observability stack approved by ARC-005. Add alert-rule artifacts for the thresholds approved by RDR-004 and document dashboard, routing, ownership, and runbook gaps without inventing operational infrastructure.
+- **Dependencies:** ARC-005, CRT-004, RED-002, ANL-002, REL-IMPL-001, REL-IMPL-003
+- **Acceptance Criteria:**
+  1. Request counts, latency distributions, and errors use normalized operation and outcome dimensions.
+  2. Creation, redirect, analytics, dependency, rate-limit, saturation, and lifecycle outcomes required by OBS-001 through OBS-005 and OBS-008 are emitted.
+  3. Metric labels use a reviewed allowlist and exclude sensitive or unbounded identifiers.
+  4. Alert definitions match the thresholds and evaluation windows approved by RDR-004 and pass synthetic rule evaluation.
+  5. Dashboard coverage, alert routing, ownership, and any missing runbook work are documented factually.
+- **Test Requirements:** Add tests for metric emission and outcome classification, label allowlisting and cardinality, privacy exclusions, lifecycle transitions, and alert threshold, duration, firing, and recovery behavior.
+- **Security Considerations:** Metric labels and alert payloads must not contain destination URLs, short codes, credentials, IP addresses, user agents, referrers, correlation IDs, or other sensitive or unbounded values.
+- **Failure Scenarios:** An operation omits or misclassifies its outcome; an attacker creates unbounded label cardinality; sensitive data reaches metrics or alerts; an alert fires too early, fails to fire, or does not recover; observability-backend failure changes application behavior.
+- **Impacted Components:** Future request and service instrumentation, metrics configuration, alert rules, observability documentation, and tests
+- **Human Approval Required:** Yes — engineer review of metric semantics, label bounds, privacy controls, and alert thresholds is required.
 
 ## PHASE 7 - Security
 
