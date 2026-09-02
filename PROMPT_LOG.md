@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-016
+
+- **Prompt ID:** PROMPT-016
+- **Task ID:** CRT-004
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement the approved URL creation API and orchestration.
+- **Context Provided:** CRT-004 in `TASKS.md`; accepted ARC-002, CRT-001, CRT-002, and CRT-003; existing configuration, error, persistence, validator, and generator components.
+- **Constraints:** Execute only CRT-004; preserve non-idempotent duplicate behavior, configured public base URL, one-time token response, durable save-before-response, bounded collision retries, safe errors, and no redirect/analytics implementation.
+- **Acceptance Criteria:** Valid requests return `201` with approved fields; invalid requests persist nothing; duplicate requests create independent mappings; collision exhaustion maps to `500`; datastore failures cannot return success; base URL is trusted configuration only.
+- **AI Output Summary:** Added creation service with token hashing, durable repository save, collision retry handling, and API controller with request/response models and safe error mapping.
+- **Files Changed:** `src/main/java/com/example/urlshortener/url/LinkCreationService.java`, `src/main/java/com/example/urlshortener/web/LinkCreationController.java`, `src/test/java/com/example/urlshortener/url/LinkCreationServiceTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review API wire behavior, token handling, collision classification, and conditional bean lifecycle.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** Initial test run failed on application context construction and mocked collision retry behavior; fixes added explicit constructor injection and conditional controller/service activation plus deterministic retry stubbing. Final `git diff --check` passed.
+- **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds with 4 actionable tasks and no reported failures.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-015
 
 - **Prompt ID:** PROMPT-015
 - **Task ID:** CRT-003
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement approved secure random short-code generation and bounded collision retry policy.
 - **Context Provided:** CRT-003 in `TASKS.md`; approved AMB-002/RDR-002 policy and ARC-003 uniqueness model; accepted CRT-002 persistence and current Java conventions.
 - **Constraints:** Execute only CRT-003; use ten-character case-sensitive Base62 codes, cryptographically secure randomness with rejection sampling, maximum six total attempts, no logging of candidates, and no unrelated API/persistence orchestration.
 - **Acceptance Criteria:** Codes match the approved alphabet/length; randomness source is secure; retry bound is explicit; tests cover format, volume, deterministic rejection sampling, and exhaustion boundary.
 - **AI Output Summary:** Added `ShortCodeGenerator` with rejection-sampled `SecureRandom` output and bounded collision-attempt policy, plus focused property-style and deterministic tests.
 - **Files Changed:** `src/main/java/com/example/urlshortener/url/ShortCodeGenerator.java`, `src/test/java/com/example/urlshortener/url/ShortCodeGeneratorTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review entropy implementation, collision integration seam, and exhaustion behavior.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the entropy implementation, collision integration seam, and exhaustion behavior and explicitly approved CRT-003 on 2026-09-02.
+- **Accepted Output:** Secure random Base62 generator, rejection sampling, bounded attempt policy, and associated tests.
+- **Edited Output:** None — the engineer approved the generated implementation without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; `git diff --check` passed.
 - **Test Results:** BUILD SUCCESSFUL in 11 seconds; 4 actionable tasks executed. No test failures were reported.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-014
 

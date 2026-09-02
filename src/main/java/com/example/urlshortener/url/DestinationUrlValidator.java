@@ -2,8 +2,10 @@ package com.example.urlshortener.url;
 
 import java.net.URI;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Component;
 
 /** Validates and preserves approved redirect destinations without contacting them. */
+@Component
 public final class DestinationUrlValidator {
 
     public static final int MAX_LENGTH = 4_096;

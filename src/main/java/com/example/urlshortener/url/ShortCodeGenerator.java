@@ -1,8 +1,10 @@
 package com.example.urlshortener.url;
 
 import java.security.SecureRandom;
+import org.springframework.stereotype.Component;
 
 /** Generates unpredictable, case-sensitive Base62 short codes. */
+@Component
 public final class ShortCodeGenerator {
     public static final int LENGTH = 10;
     public static final int MAX_ATTEMPTS = 6;
