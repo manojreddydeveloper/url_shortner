@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-013
+
+- **Prompt ID:** PROMPT-013
+- **Task ID:** CRT-001
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement the approved destination URL validator as an isolated, testable domain component.
+- **Context Provided:** CRT-001 in `TASKS.md`; approved REQ-002 URL policy and RDR-002; accepted FND-001/FND-002 and ARC-001 through ARC-005; current Java/Spring Boot conventions.
+- **Constraints:** Execute only CRT-001; no network fetching, persistence, API wiring, dependencies, or unrelated refactors; preserve accepted input exactly; reject prohibited schemes, hosts, credentials, controls, malformed escapes, Unicode, and oversized values.
+- **Acceptance Criteria:** Approved valid classes are accepted and preserved; prohibited classes are rejected; 4,096-character boundary is enforced; validation performs no destination fetch.
+- **AI Output Summary:** Added pure `DestinationUrlValidator` and parameterized tests covering valid URLs, preservation, length boundaries, schemes, host forms, credentials, whitespace, controls, malformed escapes, Unicode, and port limits.
+- **Files Changed:** `src/main/java/com/example/urlshortener/url/DestinationUrlValidator.java`, `src/test/java/com/example/urlshortener/url/DestinationUrlValidatorTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review URL host-policy implementation and test coverage.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; `git diff --check` passed.
+- **Test Results:** BUILD SUCCESSFUL in 10 seconds; 4 actionable tasks executed. No test failures were reported, including the 4,096-character boundary case.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-012
 
 - **Prompt ID:** PROMPT-012
 - **Task ID:** FND-002
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Validate the existing cross-cutting service foundation for configuration, safe errors, request correlation, and structured logging.
 - **Context Provided:** FND-002 in `TASKS.md`; accepted FND-001 and ARC-001 through ARC-005; existing implementation and tests; approved API/security/observability requirements.
 - **Constraints:** Execute only FND-002; do not add dependencies or product behavior; do not weaken tests or refactor unrelated code; preserve approved safe-error and privacy boundaries.
 - **Acceptance Criteria:** Invalid configuration fails early without secrets; error envelopes are safe and contractual; correlation IDs are validated/propagated; logs are structured and redacted; no creation, redirect, or analytics behavior is present.
 - **AI Output Summary:** Audited the existing FND-002 implementation and tests and ran the relevant Gradle test suite. No source changes were required.
 - **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review the existing implementation attribution and validation evidence.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the existing implementation attribution and validation evidence and explicitly approved FND-002 on 2026-09-02.
+- **Accepted Output:** Configuration validation, safe error mapping, request correlation, structured logging, and their passing tests.
+- **Edited Output:** None — the engineer approved the generated task records without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully; implementation inspection confirmed configuration, error, correlation, and logging boundaries.
 - **Test Results:** BUILD SUCCESSFUL in 10 seconds; 4 actionable tasks executed. No test failures were reported.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 
 - **Prompt ID:** PROMPT-009
