@@ -112,6 +112,27 @@ Copy this template for every new material AI activity.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed successfully in 10 seconds with 4 tasks executed. The generated JUnit reports contain 9 tests, 0 failures, 0 errors, and 0 skipped tests. These application tests are regression evidence; REQ-001 itself is a documentation and decision-record task.
 - **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
+### PROMPT-010
+
+- **Prompt ID:** PROMPT-010
+- **Task ID:** ARC-005
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Define reliability failure handling, lifecycle behavior, cache policy, telemetry boundaries, and operational alert evidence.
+- **Context Provided:** ARC-005 in `TASKS.md`; approved RDR-001 through RDR-004; accepted ARC-001 through ARC-004; existing architecture/API/security/performance documents; and the Java/Spring Boot/Hibernate/PostgreSQL baseline.
+- **Constraints:** Execute only ARC-005; document bounded failure and observability behavior without implementing source, dependencies, cache, retries, queues, or tracing; preserve approved fail-open analytics and no-cache baseline; defer production recovery commitments.
+- **Acceptance Criteria:** Material failures map to client outcomes and signals; timeout/retry bounds are explicit; cache behavior is explicit; startup/readiness/liveness/shutdown/recovery are specified; telemetry is bounded and privacy-safe; fault and lifecycle test scenarios are identifiable.
+- **AI Output Summary:** Added the ARC-005 reliability/observability boundary matrix, decision record, traceability row, and security/performance cross-reference documents.
+- **Files Changed:** `docs/architecture.md`, `docs/security.md`, `docs/performance.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review required for timeout/retry limits, lifecycle behavior, cache exclusion, telemetry controls, and recovery deferrals.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
+- **Test Results:** Existing automated tests were not rerun because ARC-005 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-003
 
 - **Prompt ID:** PROMPT-003
@@ -243,18 +264,18 @@ Copy this template for every new material AI activity.
 - **Prompt ID:** PROMPT-009
 - **Task ID:** ARC-004
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Define the minimal analytics data and processing architecture consistent with approved click, privacy, access, retention, failure, and performance semantics.
 - **Context Provided:** ARC-004 in `TASKS.md`; approved RDR-001 through RDR-004; accepted ARC-001, ARC-002, and ARC-003; existing architecture/API/decision/traceability documents; and the Java/Spring Boot/Hibernate/PostgreSQL baseline.
 - **Constraints:** Execute only ARC-004; document architecture and decisions without implementing source, schema, dependencies, queues, or services; preserve fail-open analytics and privacy boundaries; do not claim exactly-once delivery or destination arrival; keep additional infrastructure explicitly deferred pending measured need and engineer approval.
 - **Acceptance Criteria:** Event boundary, delivery/loss/consistency/freshness/retention guarantees, privacy transformations, redirect overhead target, and infrastructure alternatives are explicit and testable.
 - **AI Output Summary:** Added an ARC-004 guarantees/boundaries table to `docs/architecture.md`, recorded the analytics architecture decision and alternatives in `DECISIONS.md`, and added traceability/activity records.
 - **Files Changed:** `docs/architecture.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review required for event semantics, loss tolerance, privacy boundary, and infrastructure deferrals.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the generated ARC-004 changes and explicitly approved them on 2026-09-02.
+- **Accepted Output:** The analytics event boundary, delivery/loss/consistency/freshness/retention guarantees, privacy transformations, aggregate query path, and no-extra-infrastructure baseline.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
 - **Test Results:** Existing automated tests were not rerun because ARC-004 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
