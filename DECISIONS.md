@@ -68,6 +68,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Rationale:** The selected envelope is large enough to exercise concurrency, data cardinality, failures, privacy, and performance while remaining a bounded assessment prototype. Explicit deferrals prevent prototype evidence from being represented as a production commitment.
 - **Task-gap disposition:** Add OBS-IMPL-001 to own bounded request/creation/redirect metrics and alert definitions previously identified as gaps for OBS-001 through OBS-003 and OBS-009.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the generated REQ-004 documentation changes on 2026-09-02.
+- **REL-IMPL-001 adjustment:** APPROVED on 2026-09-02 — use HikariCP's supported 250 ms minimum for connection acquisition instead of the earlier 100 ms target; all other approved dependency budgets remain unchanged.
 
 ### ARC-001 — Propose system boundaries and technical stack
 

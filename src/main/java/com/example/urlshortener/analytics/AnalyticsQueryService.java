@@ -2,6 +2,7 @@ package com.example.urlshortener.analytics;
 
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
+import com.example.urlshortener.persistence.DatabaseTimeBudget;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
@@ -29,16 +30,22 @@ public class AnalyticsQueryService {
     private final LinkRepository links;
     private final ClickEventRepository events;
     private final Clock clock;
+    private final DatabaseTimeBudget timeBudget;
 
     @Autowired
-    public AnalyticsQueryService(LinkRepository links, ClickEventRepository events) {
-        this(links, events, Clock.systemUTC());
+    public AnalyticsQueryService(LinkRepository links, ClickEventRepository events, DatabaseTimeBudget timeBudget) {
+        this(links, events, Clock.systemUTC(), timeBudget);
     }
 
     AnalyticsQueryService(LinkRepository links, ClickEventRepository events, Clock clock) {
+        this(links, events, clock, null);
+    }
+
+    AnalyticsQueryService(LinkRepository links, ClickEventRepository events, Clock clock, DatabaseTimeBudget timeBudget) {
         this.links = links;
         this.events = events;
         this.clock = clock;
+        this.timeBudget = timeBudget;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -54,6 +61,7 @@ public class AnalyticsQueryService {
 
         TokenDigest candidate = tokenDigest(token);
         try {
+            if (timeBudget != null) timeBudget.apply(DatabaseTimeBudget.Operation.ANALYTICS_QUERY);
             LinkEntity link = links.findByShortCode(code).orElse(null);
             byte[] expectedHash = link == null ? UNKNOWN_TOKEN_HASH : link.getAnalyticsTokenHash();
             boolean tokenMatches = expectedHash != null

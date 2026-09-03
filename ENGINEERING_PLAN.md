@@ -269,7 +269,7 @@ This matrix is normative for the requirements baseline. Exact JSON schemas and e
 - **Ambiguity:** Creation and redirect behavior during datastore timeouts, unavailability, or partial failure is unspecified.
 - **Why it matters:** Returning not found during an outage is incorrect, returning success before durability can lose mappings, and unbounded retries can amplify an outage.
 - **Possible interpretations:** Fail all operations; serve approved cached redirects; allow stale reads; queue creation; retry synchronously.
-- **Recommended interpretation:** Require a durable authoritative commit before creation success and never translate datastore failure into not found. Use budgets of 100 ms for connection acquisition, 150 ms for mapping lookup, 500 ms for creation transaction, 50 ms for analytics append, and 1 second for analytics aggregate query. Perform no application-level dependency retry and do not queue creation. Return a retryable `503` outcome for authoritative creation, redirect, or analytics-query failure; exact wire details remain ARC-002. Analytics append alone follows the approved RDR-003 fail-open loss policy.
+- **Recommended interpretation:** Require a durable authoritative commit before creation success and never translate datastore failure into not found. Use budgets of 250 ms for connection acquisition (the supported HikariCP minimum), 150 ms for mapping lookup, 500 ms for creation transaction, 50 ms for analytics append, and 1 second for analytics aggregate query. Perform no application-level dependency retry and do not queue creation. Return a retryable `503` outcome for authoritative creation, redirect, or analytics-query failure; exact wire details remain ARC-002. Analytics append alone follows the approved RDR-003 fail-open loss policy.
 - **Status:** APPROVED — RDR-004, 2026-09-02
 
 ### AMB-014 — Analytics failure
@@ -375,7 +375,7 @@ At one million active mappings, ten-character Base62 occupancy is approximately 
 | Limit identity | Direct peer unless the peer is an explicitly trusted proxy; ignore forwarding headers otherwise. Use a keyed in-memory pseudonymous derivation, never persist or log raw IP, and expire idle entries after 15 minutes. |
 | Limit reset and scaling | State reset on process restart is accepted. Multiple application instances require a new shared-enforcement decision. |
 | Rate rejection | Return `429 Too Many Requests` with bounded `Retry-After`; exact schema belongs to ARC-002. |
-| Connection acquisition | Fail after 100 ms without an application retry. |
+| Connection acquisition | Fail after 250 ms, the supported HikariCP minimum, without an application retry. |
 | Mapping lookup | Fail after 150 ms without an application retry; authoritative uncertainty produces `503`, never `404`. |
 | Creation transaction | Fail after 500 ms without dependency retry or queued creation; never return success without durable commit. Collision retries are governed separately by RDR-002. |
 | Analytics append | Stop waiting after 50 ms, do not retry or buffer, emit privacy-safe loss evidence, and preserve a valid redirect. |

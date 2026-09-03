@@ -26,6 +26,7 @@ public class LinkCreationController {
             return ResponseEntity.status(HttpStatus.CREATED).body(new Response(result.code(), shortUrl(result.code()), result.url(), result.createdAt(), result.analyticsToken()));
         } catch (IllegalArgumentException exception) { throw validation(); }
           catch (LinkCreationService.CreationUnavailableException exception) { throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An internal creation failure occurred."); }
+          catch (LinkCreationService.DependencyUnavailableException exception) { throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "DEPENDENCY_UNAVAILABLE", "The link service is temporarily unavailable."); }
     }
     private String shortUrl(String code) { URI base = properties.publicBaseUrl(); return base.toString().replaceFirst("/$", "") + "/" + code; }
     private static ApiException validation() { return new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "The request contains invalid fields."); }

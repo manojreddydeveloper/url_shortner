@@ -282,6 +282,27 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-022
+
+- **Prompt ID:** PROMPT-022
+- **Task ID:** REL-IMPL-001
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Implement bounded PostgreSQL dependency behavior and safe no-retry failure mappings.
+- **Context Provided:** REL-IMPL-001 in `TASKS.md`; accepted CRT-004, RED-002, ANL-002, and ARC-005; approved dependency failure, retry, timeout, and observability policies; engineer-approved adjustment of pool acquisition from 100 ms to HikariCP's supported 250 ms minimum.
+- **Constraints:** Execute only REL-IMPL-001; add no dependency, cache, queue, or unsafe background timeout; preserve collision-only creation retries, fail-open analytics append, and safe client errors.
+- **Acceptance Criteria:** Dependency operations use approved budgets; only short-code collisions retry; creation, redirect, append, and query failures preserve approved outcomes; failures remain distinguishable without exposing dependency details.
+- **AI Output Summary:** Added PostgreSQL transaction-local statement budgets for lookup, creation, append, and analytics query operations; configured 250 ms pool acquisition; isolated collision attempts in independent transactions; restricted retries to the named uniqueness constraint; mapped other persistence failure without retry; reconciled reliability documentation and added deterministic budget/failure tests.
+- **Files Changed:** `DatabaseTimeBudget.java`, `LinkWriter.java`, persistence consumers in creation/redirect/analytics, `LinkCreationController.java`, `application.properties`, focused tests, `ENGINEERING_PLAN.md`, `docs/architecture.md`, `docs/performance.md`, `DECISIONS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Standing engineer approval applies; the engineer explicitly selected the 250 ms HikariCP acquisition minimum. Live PostgreSQL timeout and load behavior remains for integration/performance validation.
+- **Accepted Output:** Supported acquisition timeout, explicit PostgreSQL statement budgets, no-retry failure mappings, named collision classification, and deterministic tests.
+- **Edited Output:** The original 100 ms acquisition target was revised to 250 ms after local dependency inspection confirmed HikariCP 7.0.2's supported minimum.
+- **Rejected Output:** Unsupported Hikari internal override, detached thread timeouts, automatic dependency retries, and treating every integrity violation as a collision.
+- **Rejection Reason:** These would be unsupported, could leave database work running after timeout, amplify failures, or misclassify permanent errors.
+- **Validation:** Full Gradle `check` and `git diff --check` passed. HikariCP 7.0.2 was confirmed through Gradle dependency inspection and local bytecode inspection; live PostgreSQL timeout execution was unavailable because Docker was not running.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home check --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 14 seconds. JUnit XML reports contain 70 tests with no failures, errors, or skips.
+- **Engineer Approval:** APPROVED under standing authorization on 2026-09-02; the 250 ms adjustment was explicitly approved by the engineer.
+
 ### PROMPT-021
 
 - **Prompt ID:** PROMPT-021

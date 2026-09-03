@@ -371,7 +371,7 @@ In-process correlation is required. Distributed tracing is not a baseline depend
 
 | Area | Baseline behavior | Operational evidence |
 | --- | --- | --- |
-| Database calls | Bounded pool acquisition (100 ms), lookup (150 ms), creation (500 ms), analytics append (50 ms), and analytics query (1 s); no automatic dependency retry | Timeout, pool saturation, dependency error, and resulting `503` metrics/logs |
+| Database calls | Bounded pool acquisition (250 ms, the supported HikariCP minimum), lookup (150 ms), creation (500 ms), analytics append (50 ms), and analytics query (1 s); no automatic dependency retry | Timeout, pool saturation, dependency error, and resulting `503` metrics/logs |
 | Retry policy | Only recognized code-uniqueness conflicts retry, with five new candidates | Collision retry/exhaustion counters and sampled logs |
 | Cache | No baseline cache; redirects use `Cache-Control: no-store`; unknown codes are not negative-cached | Architecture conformance; no cache failure can mask datastore failure |
 | Lifecycle | PostgreSQL-required readiness, dependency-independent liveness, and a maximum 30-second graceful drain | Health transitions, lifecycle state, and unready alerts |
