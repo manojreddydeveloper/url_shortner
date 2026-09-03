@@ -60,4 +60,25 @@ class OperationalMetricsTest {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> metrics.saturation("user-supplied", 0.5));
     }
+
+    @Test
+    void deletionLagClampsNegativeDurationToZero() {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        OperationalMetrics metrics = new OperationalMetrics(registry);
+        metrics.deletionLag(Duration.ofSeconds(-10));
+        assertThat(registry.find("url_shortener.analytics.deletion.lag.seconds").gauge().value())
+                .isEqualTo(0);
+    }
+
+    @Test
+    void saturationClampsOutOfRangeValues() {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        OperationalMetrics metrics = new OperationalMetrics(registry);
+        metrics.saturation("database", -0.5);
+        assertThat(registry.find("url_shortener.pool.utilization")
+                .tag("pool", "database").gauge().value()).isEqualTo(0);
+        metrics.saturation("database", 1.5);
+        assertThat(registry.find("url_shortener.pool.utilization")
+                .tag("pool", "database").gauge().value()).isEqualTo(1);
+    }
 }

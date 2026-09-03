@@ -111,6 +111,21 @@ class RateLimitInterceptorTest {
                 .andExpect(status().isTooManyRequests());
     }
 
+    @Test
+    void analyticsOverQuotaReturns429() throws Exception {
+        String bearerToken = "dGhpc19pc19hX3Rlc3RfdG9rZW4"; // base64url encoded test token
+        for (int i = 0; i < 60; i++) {
+            mockMvc.perform(get("/api/v1/links/abc123/analytics")
+                            .header("Authorization", "Bearer " + bearerToken))
+                    .andExpect(status().isOk());
+        }
+        mockMvc.perform(get("/api/v1/links/abc123/analytics")
+                        .header("Authorization", "Bearer " + bearerToken))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"));
+    }
+
     private static jakarta.servlet.http.HttpServletRequest mockRequest(String remoteAddr) {
         jakarta.servlet.http.HttpServletRequest request =
                 mock(jakarta.servlet.http.HttpServletRequest.class);
@@ -132,6 +147,12 @@ class RateLimitInterceptorTest {
         @org.springframework.web.bind.annotation.GetMapping(produces = "application/json")
         org.springframework.http.ResponseEntity<String> list() {
             return org.springframework.http.ResponseEntity.ok("[]");
+        }
+
+        @org.springframework.web.bind.annotation.GetMapping("/{code}/analytics")
+        org.springframework.http.ResponseEntity<String> analytics(
+                @org.springframework.web.bind.annotation.PathVariable String code) {
+            return org.springframework.http.ResponseEntity.ok("{\"code\":\"" + code + "\"}");
         }
     }
 

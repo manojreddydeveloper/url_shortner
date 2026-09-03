@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,6 +65,26 @@ class GlobalExceptionHandlerTest {
         assertThat(output.getAll()).doesNotContain("sensitive-database-detail");
     }
 
+    @Test
+    void handlesRateLimitExceptionWith429AndRetryAfter() throws Exception {
+        mockMvc.perform(get("/rate-limited"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "30"))
+                .andExpect(jsonPath("$.error.code").value("RATE_LIMITED"))
+                .andExpect(jsonPath("$.error.message").value(
+                        org.hamcrest.Matchers.containsString("Rate limit exceeded")));
+    }
+
+    @Test
+    void handlesApiExceptionWithDetails() throws Exception {
+        mockMvc.perform(get("/with-details")
+                        .header(RequestCorrelationFilter.REQUEST_ID_HEADER, "req-d"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.details").isArray())
+                .andExpect(jsonPath("$.error.details[0].field").value("url"));
+    }
+
     @RestController
     static class TestController {
 
@@ -75,6 +96,17 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/unexpected")
         void unexpected() {
             throw new IllegalStateException("sensitive-database-detail");
+        }
+
+        @GetMapping("/rate-limited")
+        void rateLimited() {
+            throw new RateLimitException(30);
+        }
+
+        @GetMapping("/with-details")
+        void withDetails() {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                    "Invalid fields.", List.of(new ApiErrorResponse.ErrorDetail("url", "must be valid")));
         }
     }
 }

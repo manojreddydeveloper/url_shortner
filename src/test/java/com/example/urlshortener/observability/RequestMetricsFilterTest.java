@@ -44,4 +44,29 @@ class RequestMetricsFilterTest {
         assertThat(RequestMetricsFilter.outcome(503)).isEqualTo(Outcome.DEPENDENCY_FAILURE);
         assertThat(RequestMetricsFilter.outcome(500)).isEqualTo(Outcome.INTERNAL_FAILURE);
     }
+
+    @Test
+    void classifiesUnrecognizedRouteAsOther() {
+        assertThat(RequestMetricsFilter.operation("DELETE", "/api/v1/links"))
+                .isEqualTo(Operation.OTHER);
+        assertThat(RequestMetricsFilter.operation("PUT", "/api/v1/links/abc123"))
+                .isEqualTo(Operation.OTHER);
+        assertThat(RequestMetricsFilter.operation("POST", "/unknown"))
+                .isEqualTo(Operation.OTHER);
+    }
+
+    @Test
+    void filterRecordsMetricsForAnyRequest() throws Exception {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        RequestMetricsFilter filter = new RequestMetricsFilter(new OperationalMetrics(registry));
+        MockHttpServletRequest request = new MockHttpServletRequest("DELETE", "/api/v1/links");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        response.setStatus(204);
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertThat(registry.find("url_shortener.requests")
+                .tags("operation", "other", "outcome", "success", "status_class", "2xx")
+                .counter().count()).isEqualTo(1);
+    }
 }

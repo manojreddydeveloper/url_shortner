@@ -13,6 +13,7 @@ import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 import java.security.MessageDigest;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -124,6 +125,33 @@ class AnalyticsQueryServiceTest {
                         null));
         assertThrows(AnalyticsQueryService.ValidationException.class,
                 () -> service.query(CODE, token, null, null, "hour"));
+    }
+
+    @Test
+    void rejectsFromAfterTo() {
+        assertThrows(AnalyticsQueryService.ValidationException.class,
+                () -> service.query(CODE, token, NOW.toString(), DEFAULT_FROM.toString(), null));
+    }
+
+    @Test
+    void rejectsRangeExceeding90Days() {
+        Instant from = NOW.minus(Duration.ofDays(91));
+        assertThrows(AnalyticsQueryService.ValidationException.class,
+                () -> service.query(CODE, token, from.toString(), NOW.toString(), null));
+    }
+
+    @Test
+    void acceptsCustomRangeWithin90Days() {
+        Instant from = NOW.minus(Duration.ofDays(30));
+        Instant to = NOW.minus(Duration.ofDays(10));
+        ClickEventRepository.TrafficTotals zeroTotals = totals(0, 0, 0);
+        when(events.aggregateTotals(42L, from, to, RETENTION_CUTOFF)).thenReturn(zeroTotals);
+        when(events.aggregateDaily(42L, from, to, RETENTION_CUTOFF)).thenReturn(List.of());
+
+        AnalyticsQueryService.Result result = service.query(
+                CODE, token, from.toString(), to.toString(), null);
+
+        assertEquals(new AnalyticsQueryService.Totals(0, 0, 0), result.totals());
     }
 
     @Test

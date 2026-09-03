@@ -26,4 +26,24 @@ class LinkResolverTest {
         when(repo.findByShortCode(any())).thenThrow(new DataAccessResourceFailureException("down"));
         assertEquals(LinkResolver.Outcome.DEPENDENCY_UNAVAILABLE, new LinkResolver(repo).resolve("aZ3kP9mQ2x").outcome());
     }
+    @Test void nullCodeIsNotFoundWithoutLookup() {
+        LinkRepository repo = mock(LinkRepository.class);
+        assertEquals(LinkResolver.Outcome.NOT_FOUND, new LinkResolver(repo).resolve(null).outcome());
+        verifyNoInteractions(repo);
+    }
+    @Test void nonTenCharCodeIsNotFoundWithoutLookup() {
+        LinkRepository repo = mock(LinkRepository.class);
+        assertEquals(LinkResolver.Outcome.NOT_FOUND, new LinkResolver(repo).resolve("short").outcome());
+        verifyNoInteractions(repo);
+    }
+    @Test void elevenCharCodeIsNotFoundWithoutLookup() {
+        LinkRepository repo = mock(LinkRepository.class);
+        assertEquals(LinkResolver.Outcome.NOT_FOUND, new LinkResolver(repo).resolve("aZ3kP9mQ2xB").outcome());
+        verifyNoInteractions(repo);
+    }
+    @Test void codeWithSpecialCharsIsNotFoundWithoutLookup() {
+        LinkRepository repo = mock(LinkRepository.class);
+        assertEquals(LinkResolver.Outcome.NOT_FOUND, new LinkResolver(repo).resolve("aZ3kP9mQ2!").outcome());
+        verifyNoInteractions(repo);
+    }
 }
