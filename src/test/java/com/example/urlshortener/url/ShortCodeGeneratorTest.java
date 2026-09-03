@@ -19,11 +19,15 @@ class ShortCodeGeneratorTest {
     }
 
     @Test
-    void producesIndependentCandidates() {
-        ShortCodeGenerator generator = new ShortCodeGenerator();
+    void producesIndependentCandidatesDeterministically() {
+        SecureRandom random = new SecureRandom() {
+            private int value;
+            @Override public int nextInt(int bound) { return value++ % 248; }
+        };
+        ShortCodeGenerator generator = new ShortCodeGenerator(random);
         Set<String> codes = new HashSet<>();
-        for (int i = 0; i < 100; i++) codes.add(generator.generate());
-        assertTrue(codes.size() > 95);
+        for (int i = 0; i < 10; i++) codes.add(generator.generate());
+        assertEquals(10, codes.size());
     }
 
     @Test

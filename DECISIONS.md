@@ -67,6 +67,14 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Infrastructure boundary:** No cache, Redis, Kafka, queue, microservice, separate analytics service, or distributed rate-limit state is required by this baseline. Architecture may select one application framework and one authoritative datastore only after comparing approved alternatives. Additional infrastructure requires measured failure against an approved target and a new decision.
 - **Rationale:** The selected envelope is large enough to exercise concurrency, data cardinality, failures, privacy, and performance while remaining a bounded assessment prototype. Explicit deferrals prevent prototype evidence from being represented as a production commitment.
 - **Task-gap disposition:** Add OBS-IMPL-001 to own bounded request/creation/redirect metrics and alert definitions previously identified as gaps for OBS-001 through OBS-003 and OBS-009.
+
+### EXEC-001 — Reorder testing ahead of security implementation
+
+- **Status:** APPROVED
+- **Date:** 2026-09-02
+- **Decision:** Execute TST-001 and TST-002 against the completed non-security baseline before Phase 7 security implementation. Security-specific unit, contract, fault, and privacy coverage remains required during SEC-IMPL-001 through SEC-IMPL-003 and TST-003; this ordering does not waive those acceptance criteria.
+- **Rationale:** The engineer explicitly requested Testing and Brownfield work before Security. Separating current-baseline evidence from later security validation preserves dependency truth while enabling the requested order.
+- **Engineer disposition:** APPROVED by explicit project-conversation authorization on 2026-09-02.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the generated REQ-004 documentation changes on 2026-09-02.
 - **REL-IMPL-001 adjustment:** APPROVED on 2026-09-02 — use HikariCP's supported 250 ms minimum for connection acquisition instead of the earlier 100 ms target; all other approved dependency budgets remain unchanged.
 

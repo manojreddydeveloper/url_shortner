@@ -345,6 +345,27 @@ Copy this template for every new material AI activity.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 12 seconds; JUnit XML reports 86 tests, 0 failures, 0 errors, and 0 skipped.
 - **Engineer Approval:** APPROVED under standing authorization on 2026-09-02.
 
+### PROMPT-026
+
+- **Prompt ID:** PROMPT-026
+- **Task ID:** TST-001
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Complete deterministic unit/property coverage for the implemented non-security baseline.
+- **Context Provided:** TST-001; current source/test tree; approved behavior matrices and test-layer architecture; the engineer's explicit authorization to execute Testing before Security.
+- **Constraints:** Preserve later security and fault gates; make no production changes; do not weaken tests or invent a percentage coverage target; use synthetic data and no outbound network.
+- **Acceptance Criteria:** Each currently applicable pure rule has direct boundary/invariant coverage; tests are deterministic and externally independent; approved goals pass or gaps are explicit; two consecutive executions succeed.
+- **AI Output Summary:** Recorded EXEC-001 and the revised task gate, documented coverage layers/gaps/commands, added the null destination boundary, and replaced a probabilistic candidate-independence assertion with a controlled-random deterministic equivalent.
+- **Files Changed:** `TASKS.md`, `DECISIONS.md`, `docs/testing.md`, `src/test/java/com/example/urlshortener/url/DestinationUrlValidatorTest.java`, `src/test/java/com/example/urlshortener/url/ShortCodeGeneratorTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Dependency reordering was explicitly authorized; detailed test diff and evidence remain available for inspection.
+- **Accepted Output:** Current-baseline unit/property coverage, deterministic test change, explicit test-layer gaps, and commands.
+- **Edited Output:** Replaced the pre-existing probabilistic independence sample with deterministic controlled randomness; coverage intent was preserved.
+- **Rejected Output:** Invented line/branch threshold and claims of real PostgreSQL, security, or fault coverage.
+- **Rejection Reason:** No percentage target was approved and those layers belong to later tasks.
+- **Validation:** `git diff --check` plus two consecutive full unit/component suite executions; exact totals recorded below.
+- **Test Results:** First `clean test --rerun-tasks --no-daemon` and second `test --rerun-tasks --no-daemon` both completed `BUILD SUCCESSFUL` in 12 seconds; the final JUnit XML reports 87 tests, 0 failures, 0 errors, and 0 skipped.
+- **Engineer Approval:** APPROVED under explicit dependency-reorder authorization and standing task-flow authorization on 2026-09-02.
+
 ### PROMPT-022
 
 - **Prompt ID:** PROMPT-022

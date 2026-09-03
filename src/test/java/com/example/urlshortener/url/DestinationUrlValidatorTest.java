@@ -27,6 +27,11 @@ class DestinationUrlValidatorTest {
     }
 
     @org.junit.jupiter.api.Test
+    void rejectsNullDestination() {
+        assertThrows(IllegalArgumentException.class, () -> validator.validate(null));
+    }
+
+    @org.junit.jupiter.api.Test
     void acceptsMaximumLengthUrl() {
         String prefix = "https://example.com/";
         String url = prefix + "a".repeat(DestinationUrlValidator.MAX_LENGTH - prefix.length());

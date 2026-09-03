@@ -564,7 +564,7 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: No
 - **Intent:** Validate pure rules and invariants independently and reproducibly.
 - **Description:** Complete unit and property tests for validation, short-code generation, lifecycle, classification, aggregation, configuration, and error behavior.
-- **Dependencies:** All applicable feature implementations through Phase 7
+- **Dependencies:** All applicable non-security feature implementations through OBS-IMPL-001. Security-specific unit coverage is deferred to SEC-IMPL-001 through SEC-IMPL-003 and TST-003 under the engineer-approved 2026-09-02 execution-order change.
 - **Acceptance Criteria:**
   1. Each approved pure-behavior requirement has direct test coverage.
   2. Boundary and property tests cover documented invariants.
