@@ -2,6 +2,18 @@
 
 Production-oriented URL shortener prototype. The project is being implemented as a sequence of explicitly approved engineering tasks.
 
+## Project overview
+
+This repository contains a Spring Boot-based URL shortener with:
+
+- short-link creation for approved destination URLs
+- redirect resolution for stored short codes
+- analytics capture and aggregate retrieval
+- health, observability, and reliability support
+- documentation-driven task tracking and traceability
+
+The codebase is intentionally governed by the engineering plan, task backlog, decision log, and traceability records in this repository. Those documents describe what is approved, what is still pending, and how implementation evidence is tracked.
+
 ## Current scope
 
 FND-001 provides the buildable project foundation:
@@ -34,6 +46,44 @@ Application logs use structured JSON with service identity and operation, outcom
 
 Shutdown is graceful: the embedded server stops accepting new requests and gives active requests up to 30 seconds to finish before termination. Analytics is attempted synchronously and has no queue or buffer to drain.
 
+## Quick start
+
+1. Read [ENGINEERING_PLAN.md](ENGINEERING_PLAN.md) for the approved requirements baseline.
+2. Read [TASKS.md](TASKS.md) for the current task order and dependency chain.
+3. Read [TRACEABILITY.md](TRACEABILITY.md) for the current implementation status.
+4. Use the documented Gradle commands below to build and test the project.
+
+For local development, set the required public base URL before starting the application:
+
+```shell
+export URL_SHORTENER_PUBLIC_BASE_URL=https://sho.rt
+```
+
+Then run the build or test commands from the sections below.
+
+## Local run
+
+Use the Gradle wrapper to start the application locally:
+
+```shell
+./gradlew bootRun
+```
+
+Environment variables used by the current codebase:
+
+- `URL_SHORTENER_PUBLIC_BASE_URL` is required and maps to the trusted public base URL used in short-link responses.
+- `APP_VERSION` is optional and defaults to `development` when not set.
+
+Example:
+
+```shell
+export URL_SHORTENER_PUBLIC_BASE_URL=https://sho.rt
+export APP_VERSION=development
+./gradlew bootRun
+```
+
+The runtime database configuration is intentionally not documented here yet because it belongs to later approved work.
+
 ## Prerequisites
 
 - A Java 21 JDK available on `PATH`
@@ -64,3 +114,38 @@ Run the minimal automated test independently:
 ```
 
 The application is packaged by the build. Runtime database configuration belongs to a later approved task and is intentionally not defined yet.
+
+## Current implementation status
+
+The traceability matrix currently records the following broad status:
+
+- implemented and verified: project foundation, configuration and logging foundations, URL validation, short-code generation, creation orchestration, redirect handling, analytics capture and retrieval, reliability controls, observability, and integration validation
+- explicitly out of scope for the baseline: expiration, cache-based redirect handling, recovery/backup guarantees, and other deferred production-only commitments
+- still pending: remaining final review tasks, broader performance validation tasks, and any future requirement changes that depend on new approvals
+
+See [TRACEABILITY.md](TRACEABILITY.md) for the detailed status of each requirement and task.
+
+## Markdown guide
+
+### Root Markdown files
+
+| File | What it contains | When to read it |
+| --- | --- | --- |
+| [ENGINEERING_PLAN.md](ENGINEERING_PLAN.md) | The normalized requirements baseline, including goals, functional requirements, non-functional requirements, ambiguities, and approved requirement decisions. | Before changing scope, requirements, or policy decisions. |
+| [TASKS.md](TASKS.md) | The ordered engineering backlog with task IDs, dependencies, acceptance criteria, test requirements, and approval gates. | Before starting implementation work or validating task order. |
+| [TRACEABILITY.md](TRACEABILITY.md) | The live requirements-to-task-and-evidence traceability matrix plus implementation status summaries. | When you need to confirm what is implemented, verified, or still pending. |
+| [DECISIONS.md](DECISIONS.md) | The architecture and requirements decision log, including approved and proposed decisions. | Before making design or dependency changes that depend on approved decisions. |
+| [PROMPT_LOG.md](PROMPT_LOG.md) | The AI engineering activity log with prompt records, context, edits, validation, and approval history. | When you need the work history, validation record, or approval trail. |
+| [AI_REVIEW.md](AI_REVIEW.md) | The AI-assisted work review record and review findings. | When you need the final review notes for AI-assisted changes. |
+| [README.md](README.md) | This project summary, setup guidance, and documentation map. | First stop for a quick repository overview. |
+
+### `docs/` Markdown files
+
+| File | What it contains | When to read it |
+| --- | --- | --- |
+| [docs/architecture.md](docs/architecture.md) | The proposed system architecture, component boundaries, request flow, data flow, and database design. | Before reviewing service boundaries, flows, or persistence design. |
+| [docs/api.md](docs/api.md) | The proposed HTTP API contract, request and response shapes, status codes, and example payloads. | Before implementing or testing HTTP endpoints. |
+| [docs/security.md](docs/security.md) | The threat model, hardened input/output boundaries, and verified security controls. | Before reviewing risks, input validation, or exposed data. |
+| [docs/operations.md](docs/operations.md) | Operational metrics, alerts, and operational gaps that still require deployment-owner decisions. | Before wiring metrics, alerts, or operational runbooks. |
+| [docs/performance.md](docs/performance.md) | The reliability and performance budget, including approved dependency timing bounds and the no-cache baseline. | Before changing timeout, caching, or throughput-sensitive behavior. |
+| [docs/testing.md](docs/testing.md) | The test strategy, coverage layers, and validation commands for the project. | Before running or extending the validation suite. |
