@@ -23,6 +23,9 @@ class OperationalMetricsTest {
         metrics.creation(Outcome.VALIDATION_REJECTION);
         metrics.redirect(Outcome.MALFORMED);
         metrics.redirect(Outcome.UNKNOWN);
+        metrics.cache("hit");
+        metrics.cache("miss");
+        metrics.cache("write");
         metrics.analytics("append", Outcome.ATTEMPTED);
         metrics.analytics("append", Outcome.COMMITTED);
         metrics.analytics("append", Outcome.FAILED);
@@ -40,6 +43,7 @@ class OperationalMetricsTest {
         assertThat(registry.getMeters()).extracting(meter -> meter.getId().getName())
                 .contains("url_shortener.requests", "url_shortener.request.duration",
                         "url_shortener.creation", "url_shortener.redirect", "url_shortener.analytics",
+                        "url_shortener.cache",
                         "url_shortener.dependency.duration", "url_shortener.rate_limit",
                         "url_shortener.collision", "url_shortener.lifecycle",
                         "url_shortener.pool.utilization", "url_shortener.analytics.deletion.lag.seconds");
@@ -61,6 +65,8 @@ class OperationalMetricsTest {
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> metrics.analytics("user-supplied", Outcome.SUCCESS));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> metrics.cache("user-supplied"));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> metrics.saturation("user-supplied", 0.5));
     }

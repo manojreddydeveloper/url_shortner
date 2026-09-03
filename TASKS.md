@@ -104,7 +104,7 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Title:** Select system boundaries and technical stack
 - **Classification:** AI-friendly: Yes; Engineer-heavy: Yes; High-impact: Yes
 - **Intent:** Choose the smallest architecture and dependency set justified by approved requirements.
-- **Description:** Compare the remaining runtime-adjacent framework, deployment, and component-boundary options around the approved PostgreSQL runtime baseline. Include a no-cache and no-queue baseline unless requirements rule them out.
+- **Description:** Compare the remaining runtime-adjacent framework, deployment, and component-boundary options around the approved PostgreSQL runtime baseline. Include the bounded process-local cache baseline and a no-queue baseline unless requirements rule them out.
 - **Dependencies:** REQ-004
 - **Acceptance Criteria:**
   1. Selected and rejected alternatives are compared against approved functional and quality targets.
@@ -441,24 +441,24 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Impacted Components:** Future datastore and analytics clients, service orchestration, error mapping, and telemetry
 - **Human Approval Required:** Yes — engineer review against REL-003 through REL-006 is required.
 
-### REL-IMPL-002 — Implement cache policy if approved
+### REL-IMPL-002 — Implement process-local redirect cache
 
 - **Task ID:** REL-IMPL-002
 - **Title:** Implement approved redirect cache behavior
 - **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: Yes
-- **Intent:** Meet approved performance or availability needs without weakening authoritative lifecycle correctness.
-- **Description:** If caching was approved and justified, implement keys, values, positive or negative behavior, TTL, invalidation, stale policy, outage fallback, and load protection. Otherwise close this task as not applicable.
-- **Dependencies:** RED-001, ARC-005, approved performance justification
+- **Intent:** Meet approved redirect performance and availability needs without weakening authoritative lifecycle correctness.
+- **Description:** Implement the approved bounded process-local cache for resolved mappings. Populate it on successful creation and successful PostgreSQL lookup, read it first during redirect resolution, evict least-recently-used entries when it reaches capacity, and keep negative caching disabled. Redis remains out of scope unless a later decision approves a shared cache.
+- **Dependencies:** RED-001, ARC-005, ADR-015
 - **Acceptance Criteria:**
   1. Hit and miss behavior is equivalent to approved authoritative resolution.
-  2. Cache lifetime never extends link validity beyond expiration or inactive state.
+  2. Cache lifetime and eviction never extend link validity beyond the approved immutable mapping model.
   3. Negative, stale, invalidation, and fallback behavior matches the decision record.
   4. Cache failure does not create false not-found results or unsafe datastore load.
-- **Test Requirements:** Add hit, miss, expiration, invalidation, negative, outage, stale, concurrency, and load-protection tests.
+- **Test Requirements:** Add hit, miss, eviction, creation write-through, outage, concurrency, and load-protection tests.
 - **Security Considerations:** Do not cache prohibited personal data; protect shared cache access; prevent cache-key injection or tenant collision.
-- **Failure Scenarios:** Expired link remains cached; cache outage overloads datastore; negative cache conceals newly created mapping.
-- **Impacted Components:** Future cache client, resolver, configuration, lifecycle policy, and telemetry
-- **Human Approval Required:** Yes — explicit approval is required before adding cache infrastructure or a dependency.
+- **Failure Scenarios:** Cached mapping is evicted too aggressively; cache outage overloads datastore; negative cache conceals newly created mapping.
+- **Impacted Components:** Cache client, resolver, creation service, configuration, lifecycle policy, and telemetry
+- **Human Approval Required:** Yes — explicit approval is required before changing cache semantics or adding a shared cache dependency.
 
 ### REL-IMPL-003 — Implement service lifecycle and recovery behavior
 
@@ -598,7 +598,7 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Test Requirements:** Run the complete integration suite with isolated fixtures, migration setup and teardown, concurrency workers, and contract-schema checks.
 - **Security Considerations:** Use synthetic data, isolated credentials, least-privileged test services, and no outbound requests to unapproved destinations.
 - **Failure Scenarios:** Tests pass only against mocks; shared state causes order dependence; concurrent defect remains hidden.
-- **Impacted Components:** API, persistence, analytics, optional cache, authorization, migration, and integration-test suites
+- **Impacted Components:** API, persistence, analytics, cache, authorization, migration, and integration-test suites
 - **Human Approval Required:** Yes — engineer review of integration fidelity and results is required.
 
 ### TST-003 — Complete fault, recovery, and security testing

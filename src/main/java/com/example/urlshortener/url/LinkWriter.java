@@ -40,12 +40,13 @@ public class LinkWriter {
     LinkWriter(LinkRepository repository) { this(repository, null); }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void save(LinkEntity link) {
+    public LinkEntity save(LinkEntity link) {
         long started = System.nanoTime();
         try {
             if (timeBudget != null) timeBudget.apply(DatabaseTimeBudget.Operation.LINK_CREATION);
-            repository.saveAndFlush(link);
+            LinkEntity saved = repository.saveAndFlush(link);
             dependency(Outcome.SUCCESS, started);
+            return saved;
         } catch (RuntimeException exception) {
             dependency(Outcome.DEPENDENCY_FAILURE, started);
             throw exception;
