@@ -1,0 +1,62 @@
+schema: url-shortener-alerts/v1
+rules:
+  - id: unexpected-server-errors
+    signal: request.unexpected_5xx_ratio
+    operator: greater_than
+    threshold: 0.01
+    for: PT5M
+  - id: redirect-p95-latency
+    signal: request.redirect_p95_seconds
+    operator: greater_than
+    threshold: 0.1
+    for: PT10M
+  - id: creation-p95-latency
+    signal: request.creation_p95_seconds
+    operator: greater_than
+    threshold: 0.2
+    for: PT10M
+  - id: analytics-query-p95-latency
+    signal: request.analytics_p95_seconds
+    operator: greater_than
+    threshold: 0.5
+    for: PT10M
+  - id: instance-unready
+    signal: lifecycle.readiness
+    operator: less_than
+    threshold: 1
+    for: PT2M
+  - id: datastore-failures
+    signal: dependency.database_failure_ratio
+    operator: greater_than
+    threshold: 0.01
+    for: PT5M
+  - id: analytics-loss
+    signal: analytics.failed_or_ambiguous_ratio
+    operator: greater_than
+    threshold: 0.01
+    for: PT5M
+  - id: rate-limit-rejections
+    signal: request.rate_limited_ratio
+    operator: greater_than
+    threshold: 0.10
+    for: PT10M
+  - id: collision-retries
+    signal: creation.collision_retry_ratio
+    operator: greater_than
+    threshold: 0.001
+    for: PT5M
+  - id: collision-exhaustion
+    signal: creation.collision_exhaustion_count
+    operator: greater_than
+    threshold: 0
+    for: PT0S
+  - id: pool-saturation
+    signal: pool.utilization
+    operator: greater_than
+    threshold: 0.80
+    for: PT10M
+  - id: analytics-deletion-lag
+    signal: analytics.deletion_lag_seconds
+    operator: greater_than
+    threshold: 86400
+    for: PT0S
