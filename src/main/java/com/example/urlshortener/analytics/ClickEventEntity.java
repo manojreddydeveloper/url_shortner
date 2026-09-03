@@ -25,7 +25,7 @@ public class ClickEventEntity {
 
     protected ClickEventEntity() { }
 
-    ClickEventEntity(ClickEvent event) {
+    public ClickEventEntity(ClickEvent event) {
         this.linkId = event.linkId();
         this.occurredAt = event.occurredAt();
         this.trafficClass = event.trafficClass();

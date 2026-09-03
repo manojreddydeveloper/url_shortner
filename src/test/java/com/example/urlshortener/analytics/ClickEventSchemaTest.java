@@ -17,7 +17,7 @@ class ClickEventSchemaTest {
 
             assertThat(migration)
                     .contains("link_id BIGINT NOT NULL")
-                    .contains("occurred_at TIMESTAMPTZ NOT NULL")
+                    .contains("occurred_at TIMESTAMP WITH TIME ZONE NOT NULL")
                     .contains("traffic_class VARCHAR(24) NOT NULL")
                     .contains("REFERENCES links(id) ON DELETE RESTRICT")
                     .contains("CHECK (traffic_class IN ('SUSPECTED_AUTOMATED', 'UNCLASSIFIED'))")

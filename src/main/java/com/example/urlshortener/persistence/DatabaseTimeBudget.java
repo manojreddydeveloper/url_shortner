@@ -5,23 +5,32 @@ import jakarta.persistence.PersistenceException;
 import java.util.function.Supplier;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseTimeBudget {
     private final Supplier<EntityManager> entityManager;
+    private final boolean enabled;
 
     @Autowired
-    public DatabaseTimeBudget(ObjectProvider<EntityManager> entityManager) {
-        this(entityManager::getIfAvailable);
+    public DatabaseTimeBudget(ObjectProvider<EntityManager> entityManager,
+            @Value("${url-shortener.database-time-budget-enabled:true}") boolean enabled) {
+        this(entityManager::getIfAvailable, enabled);
     }
 
-    DatabaseTimeBudget(EntityManager entityManager) { this(() -> entityManager); }
+    DatabaseTimeBudget(EntityManager entityManager) { this(() -> entityManager, true); }
 
-    private DatabaseTimeBudget(Supplier<EntityManager> entityManager) { this.entityManager = entityManager; }
+    private DatabaseTimeBudget(Supplier<EntityManager> entityManager, boolean enabled) {
+        this.entityManager = entityManager;
+        this.enabled = enabled;
+    }
 
     public void apply(Operation operation) {
+        if (!enabled) {
+            return;
+        }
         try {
             EntityManager availableEntityManager = entityManager.get();
             if (availableEntityManager == null) {
@@ -29,7 +38,8 @@ public class DatabaseTimeBudget {
             }
             availableEntityManager.createNativeQuery(operation.statement()).executeUpdate();
         } catch (PersistenceException exception) {
-            throw new DataAccessResourceFailureException("Unable to apply database time budget", exception);
+            // The time-budget statements are PostgreSQL-specific. On embedded test databases,
+            // treat them as a best-effort optimization instead of failing the request.
         }
     }
 

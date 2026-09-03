@@ -16,8 +16,8 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
         properties = {
                 "url-shortener.public-base-url=https://sho.rt",
                 "spring.autoconfigure.exclude="
-                        + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
-                        + "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration"
+                        + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
+                        + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
         })
 @ExtendWith(OutputCaptureExtension.class)
 class StructuredLoggingIntegrationTest {

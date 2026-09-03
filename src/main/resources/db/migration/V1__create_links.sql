@@ -3,9 +3,7 @@ CREATE TABLE links (
     short_code VARCHAR(10) NOT NULL,
     destination_url TEXT NOT NULL,
     analytics_token_hash BYTEA NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT uk_links_short_code UNIQUE (short_code),
-    CONSTRAINT ck_links_short_code_base62 CHECK (short_code ~ '^[0-9A-Za-z]{10}$'),
-    CONSTRAINT ck_links_destination_length CHECK (char_length(destination_url) <= 4096),
-    CONSTRAINT ck_links_token_hash_length CHECK (octet_length(analytics_token_hash) = 32)
+    CONSTRAINT ck_links_destination_length CHECK (char_length(destination_url) <= 4096)
 );

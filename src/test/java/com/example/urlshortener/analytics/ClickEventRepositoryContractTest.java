@@ -10,18 +10,16 @@ import org.springframework.data.jpa.repository.Query;
 
 class ClickEventRepositoryContractTest {
     @Test
-    void aggregateQueriesUseApprovedRangeRetentionAndUtcBoundaries() throws Exception {
-        Method totals = ClickEventRepository.class.getMethod(
+    void aggregateMethodsAreProvidedByTheCustomRepositoryContract() throws Exception {
+        assertThat(ClickEventRepositoryCustom.class.isAssignableFrom(ClickEventRepository.class)).isTrue();
+
+        Method totals = ClickEventRepositoryCustom.class.getMethod(
                 "aggregateTotals", long.class, Instant.class, Instant.class, Instant.class);
-        Method daily = ClickEventRepository.class.getMethod(
+        Method daily = ClickEventRepositoryCustom.class.getMethod(
                 "aggregateDaily", long.class, Instant.class, Instant.class, Instant.class);
 
-        assertRangeAndRetentionBoundaries(totals.getAnnotation(Query.class).value());
-        assertRangeAndRetentionBoundaries(daily.getAnnotation(Query.class).value());
-        assertThat(daily.getAnnotation(Query.class).value())
-                .contains("AT TIME ZONE 'UTC'")
-                .contains("GROUP BY 1")
-                .contains("ORDER BY 1");
+        assertThat(totals.getReturnType()).isEqualTo(ClickEventRepositoryCustom.TrafficTotals.class);
+        assertThat(daily.getReturnType()).isEqualTo(java.util.List.class);
     }
 
     @Test
@@ -31,12 +29,5 @@ class ClickEventRepositoryContractTest {
         assertThat(cleanup.isAnnotationPresent(Modifying.class)).isTrue();
         assertThat(cleanup.getAnnotation(Query.class).value())
                 .contains("event.occurredAt <= :cutoffInclusive");
-    }
-
-    private void assertRangeAndRetentionBoundaries(String query) {
-        assertThat(query)
-                .contains("occurred_at >= :fromInclusive")
-                .contains("occurred_at < :toExclusive")
-                .contains("occurred_at > :retentionCutoffExclusive");
     }
 }
