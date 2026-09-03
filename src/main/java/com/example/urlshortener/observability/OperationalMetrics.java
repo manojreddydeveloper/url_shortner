@@ -54,6 +54,11 @@ public class OperationalMetrics {
                 .tags("action", allowlistedAction(action), "outcome", tag(outcome))
                 .register(registry).increment();
     }
+    public void cache(String action) {
+        Counter.builder("url_shortener.cache")
+                .tag("action", allowlistedCacheAction(action))
+                .register(registry).increment();
+    }
     public void dependency(Operation operation, Outcome outcome, Duration elapsed) {
         Timer.builder("url_shortener.dependency.duration")
                 .tags("operation", tag(operation), "outcome", tag(outcome))
@@ -87,6 +92,12 @@ public class OperationalMetrics {
     private static String allowlistedAction(String action) {
         if (!action.equals("append") && !action.equals("query") && !action.equals("retention")) {
             throw new IllegalArgumentException("Unknown analytics action");
+        }
+        return action;
+    }
+    private static String allowlistedCacheAction(String action) {
+        if (!action.equals("hit") && !action.equals("miss") && !action.equals("write")) {
+            throw new IllegalArgumentException("Unknown cache action");
         }
         return action;
     }

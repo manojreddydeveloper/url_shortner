@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
+import com.example.urlshortener.cache.LinkCache;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 
@@ -15,10 +16,24 @@ import com.example.urlshortener.persistence.LinkRepository;
 class LinkResolverTest {
     @Test void resolvesActiveMapping() {
         LinkRepository repo = mock(LinkRepository.class);
+        LinkCache cache = mock(LinkCache.class);
         LinkEntity link = new LinkEntity("aZ3kP9mQ2x", "https://example.com", new byte[32], java.time.Instant.EPOCH);
+        when(cache.get("aZ3kP9mQ2x")).thenReturn(Optional.empty());
         when(repo.findByShortCode("aZ3kP9mQ2x")).thenReturn(Optional.of(link));
-        var result = new LinkResolver(repo).resolve("aZ3kP9mQ2x");
+        var result = new LinkResolver(repo, cache).resolve("aZ3kP9mQ2x");
         assertEquals(LinkResolver.Outcome.ACTIVE, result.outcome()); assertEquals(link, result.link());
+        verify(cache).get("aZ3kP9mQ2x");
+        verify(cache).put(link);
+    }
+    @Test void cacheHitBypassesRepositoryLookup() {
+        LinkRepository repo = mock(LinkRepository.class);
+        LinkCache cache = mock(LinkCache.class);
+        LinkEntity link = new LinkEntity("aZ3kP9mQ2x", "https://example.com", new byte[32], java.time.Instant.EPOCH);
+        when(cache.get("aZ3kP9mQ2x")).thenReturn(Optional.of(link));
+        var result = new LinkResolver(repo, cache).resolve("aZ3kP9mQ2x");
+        assertEquals(LinkResolver.Outcome.ACTIVE, result.outcome()); assertEquals(link, result.link());
+        verify(cache).get("aZ3kP9mQ2x");
+        verifyNoInteractions(repo);
     }
     @Test void malformedAndUnknownCodesAreNotFoundWithoutLookup() {
         LinkRepository repo = mock(LinkRepository.class);

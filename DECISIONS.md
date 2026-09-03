@@ -65,7 +65,7 @@ This log records architecture proposals and approved architecture decisions deri
 - **Task:** REQ-004
 - **Date:** 2026-09-02
 - **Requirements:** NFR-001 through NFR-012, SEC-005, SEC-008, SEC-011, SEC-013, REL-001, REL-003, REL-004, REL-007, REL-008, REL-010, REL-011, PERF-001 through PERF-008, OBS-001 through OBS-011, AC-009, AC-014, AC-016 through AC-022; confirms RDR-001 through RDR-003
-- **Decision:** Adopt the REQ-004 operating envelope, control/failure policy, operational objectives, alert thresholds, and requirements-to-acceptance coverage in `ENGINEERING_PLAN.md`. Validate a single-region, single-instance prototype at one million mappings and ten million retained events; require the documented mixed and peak throughput, percentile latency, and error objectives; use no cache or dependency retry; apply the approved creation and analytics rate limits; distinguish datastore failure as unavailable; and use bounded dependency, lifecycle, overload, and observability behavior.
+- **Decision:** Adopt the REQ-004 operating envelope, control/failure policy, operational objectives, alert thresholds, and requirements-to-acceptance coverage in `ENGINEERING_PLAN.md`. Validate a single-region, single-instance prototype at one million mappings and ten million retained events; require the documented mixed and peak throughput, percentile latency, and error objectives; use no shared cache or dependency retry in the RDR-004 baseline; apply the approved creation and analytics rate limits; distinguish datastore failure as unavailable; and use bounded dependency, lifecycle, overload, and observability behavior. ADR-015 later adds a bounded process-local cache without changing the no-shared-cache baseline.
 - **Explicit deferrals:** Contractual monthly availability, production backup/restore, RTO, RPO, cloud cost, multi-region operation, and production-data acceptance. These require new engineer decisions before production deployment or production data.
 - **Infrastructure boundary:** No cache, Redis, Kafka, queue, microservice, separate analytics service, or distributed rate-limit state is required by this baseline. Architecture may select one application framework and one authoritative datastore only after comparing approved alternatives. Additional infrastructure requires measured failure against an approved target and a new decision.
 - **Rationale:** The selected envelope is large enough to exercise concurrency, data cardinality, failures, privacy, and performance while remaining a bounded assessment prototype. Explicit deferrals prevent prototype evidence from being represented as a production commitment.
@@ -137,7 +137,7 @@ This log records architecture proposals and approved architecture decisions deri
 - **Task:** ARC-005
 - **Date:** 2026-09-02
 - **Requirements:** NFR-002, NFR-005, NFR-006, NFR-008, REL-001 through REL-012, PERF-006, OBS-001 through OBS-011, AC-009, AC-012, AC-015, AC-016, AC-018, AC-019
-- **Decision:** Use bounded dependency time budgets with no automatic retries, no baseline cache, PostgreSQL-required readiness, dependency-independent liveness, and a 30-second graceful-drain window. Emit structured privacy-safe logs, bounded metrics, in-process correlation, and alerts for approved latency, error, dependency, analytics-loss, saturation, abuse, and cleanup objectives. Defer backups/RTO/RPO and distributed tracing until separately approved.
+- **Decision:** Use bounded dependency time budgets with no automatic retries, no shared cache in the RDR-004 baseline, PostgreSQL-required readiness, dependency-independent liveness, and a 30-second graceful-drain window. Emit structured privacy-safe logs, bounded metrics, in-process correlation, and alerts for approved latency, error, dependency, analytics-loss, saturation, abuse, and cleanup objectives. Defer backups/RTO/RPO and distributed tracing until separately approved. ADR-015 later adds a bounded process-local cache.
 - **Failure matrix:** Database failure is a distinguishable `503`; analytics append failure remains fail-open for redirects; cache behavior is not applicable in the baseline; startup remains unready until PostgreSQL is healthy; shutdown drains in-flight work without buffered-analytics guarantees.
 - **Alternatives evaluated:** Dependency retries, stale/negative caching, cache-aside availability reads, durable analytics buffering, database-backed rate limiting, mandatory distributed tracing, and production recovery commitments. These add failure coupling or commitments not required by the approved prototype envelope.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-005 reliability and observability architecture on 2026-09-02. The documented implementation-level details remain subject to review during reliability implementation.
@@ -160,6 +160,7 @@ This log records architecture proposals and approved architecture decisions deri
 | ADR-012 | Analytics access and privacy | Per-link management token and minimal event data | PROPOSED |
 | ADR-013 | Error and observability boundaries | Stable error envelope; privacy-safe operational telemetry separate from analytics | PROPOSED |
 | ADR-014 | Testing architecture | Layered tests with real PostgreSQL integration and controlled clock/random seams | PROPOSED |
+| ADR-015 | Redirect cache | Bounded process-local positive cache for hot mappings | APPROVED |
 
 ## ADR-001 — Use a modular monolith
 
@@ -365,6 +366,21 @@ This log records architecture proposals and approved architecture decisions deri
 - **Trade-offs:** Integration and fault suites require isolated dependency setup and take longer than unit tests.
 - **Safety:** Tests use synthetic destinations and isolated dependencies and never send traffic to unapproved external systems.
 - **Engineer disposition:** PENDING
+
+## ADR-015 — Use a bounded process-local redirect cache
+
+- **Status:** APPROVED
+- **Requirements:** FR-004, REL-007, REL-008, REL-IMPL-002, PERF-001, PERF-008, OBS-004
+- **Context:** The approved prototype repeatedly resolves a hot set of short codes. A process-local cache can reduce repeated datastore lookups without adding Redis or another shared dependency.
+- **Proposed decision:** Add a bounded in-memory cache inside the application process for resolved mappings. Populate it on successful link creation and after successful PostgreSQL lookup, read it first during redirect resolution, and evict least-recently-used entries when it reaches capacity. Cache only positive mappings; do not negative-cache misses. Keep redirect responses `Cache-Control: no-store`.
+- **Alternatives evaluated:**
+  - No cache: simplest, but leaves repeated hot redirects on the datastore path.
+  - Redis or another shared cache: adds network and operational complexity without an approved replication need.
+  - Negative caching: risks hiding newly created mappings and complicates correctness.
+- **Advantages:** Low implementation cost, no new external dependency, reduced redirect latency for hot codes, and optional resilience for cached hits during datastore interruption.
+- **Trade-offs:** Cache state is per-process and may be lost on restart; eviction can reduce the hit ratio; cache contents are only as fresh as the immutable mapping model.
+- **Revisit when:** A shared cache, invalidation policy, or multi-instance coordination requirement is approved.
+- **Engineer disposition:** APPROVED — the engineer approved the process-local cache baseline on 2026-09-03.
 
 ## Approval checklist
 

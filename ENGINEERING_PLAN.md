@@ -264,8 +264,8 @@ This matrix is normative for the requirements baseline. Exact JSON schemas and e
 - **Ambiguity:** It is unclear whether a cache is required and, if so, how positive and negative caching, TTL, invalidation, expiration, stale reads, and outage fallback work.
 - **Why it matters:** Caching can reduce latency and datastore load but can also serve expired data, conceal failures, and complicate correctness.
 - **Possible interpretations:** No cache; process-local cache; shared cache; positive entries only; negative entries; stale-on-error behavior.
-- **Recommended interpretation:** Use no application or shared mapping cache in the baseline and do not add Redis. Send every authoritative mapping lookup to the datastore and retain `Cache-Control: no-store` on redirect responses. Reconsider a cache only if indexed datastore access misses RDR-004 targets after measured tuning; any later cache requires separately approved key, TTL, negative, invalidation, stale, fallback, and load-protection semantics.
-- **Status:** APPROVED — RDR-004, 2026-09-02
+- **Recommended interpretation:** Use a bounded process-local positive cache for resolved mappings, write through after durable creation, and do not add Redis. Cache hits may satisfy redirects without a datastore round trip, cache misses still fall back to the datastore, and redirect responses remain `Cache-Control: no-store`. Do not negative-cache unknown codes. Reconsider a shared cache only if measured evidence or topology requires it; any later shared cache requires separately approved key, TTL, negative, invalidation, stale, fallback, and load-protection semantics.
+- **Status:** APPROVED — ADR-015, 2026-09-03
 
 ### AMB-013 — Database failure
 
@@ -370,7 +370,7 @@ At one million active mappings, ten-character Base62 occupancy is approximately 
 
 | Concern | Approved behavior |
 | --- | --- |
-| Cache | No mapping cache, Redis, negative cache, stale serving, or cache fallback. The datastore is authoritative. |
+| Cache | Bounded process-local positive cache for resolved mappings; no Redis, negative cache, or stale serving. The datastore remains authoritative on cache miss. |
 | Event infrastructure | No Kafka, durable queue, separate analytics service, or analytics buffer. RDR-003 single-attempt fail-open semantics apply. |
 | Creation limit | Per derived client identity, capacity 20 and refill 10 per minute. |
 | Analytics-query limit | Per analytics bearer token, capacity 60 and refill 60 per minute. |
@@ -428,7 +428,7 @@ Alert routing, escalation recipient, and external telemetry product remain deplo
 | SEC-011 | AC-014 and AC-019 cover approved abuse controls and documentation; full malware moderation remains an approved non-goal. |
 | SEC-012–SEC-013 | AC-015, AC-018, and AC-022 cover the approved no-fetch boundary and dependency approval/security review. |
 | REL-001–REL-005 | AC-004, AC-005, AC-009, and AC-016 cover durability, collision, failure classification, timeouts, and safe retry. |
-| REL-006–REL-012 | AC-008, AC-009, AC-012, AC-013, AC-016, and AC-018 cover degradation, no-cache disposition, concurrency, lifecycle, deferred recovery, and UTC analytics. |
+| REL-006–REL-012 | AC-008, AC-009, AC-012, AC-013, AC-016, and AC-018 cover degradation, cache disposition, concurrency, lifecycle, deferred recovery, and UTC analytics. |
 | PERF-001–PERF-006 | AC-017 defines measurable workload, percentile, throughput, cardinality, and overload evidence. |
 | PERF-007–PERF-008 | AC-017–AC-019 and AC-022 require reproducible evidence and approval before infrastructure expansion. |
 | OBS-001–OBS-005 | AC-009–AC-014, AC-016, and AC-017 require observable operation, dependency, and analytics outcomes. |
@@ -442,7 +442,7 @@ The following remain planning assumptions unless an individual entry identifies 
 
 - **ASM-001 — API-only prototype:** No browser or mobile user interface is required.
 - **ASM-002 — No destination fetching — APPROVED BY RDR-002:** Core shortening and redirect behavior does not fetch, preview, crawl, or verify destination content.
-- **ASM-003 — Authoritative persistence — APPROVED BY RDR-004:** One approved durable datastore is the authoritative source for mappings; no cache is included in the baseline.
+- **ASM-003 — Authoritative persistence — APPROVED BY RDR-004 and ADR-015:** One approved durable datastore is the authoritative source for mappings, and a bounded process-local cache accelerates hot redirect resolution without changing datastore authority.
 - **ASM-004 — Single-region starting point — APPROVED BY RDR-004:** The prototype begins with a single-region, single-application-instance validation envelope.
 - **ASM-005 — Environment base URL:** The short-link base URL is supplied through approved environment configuration rather than inferred from untrusted request headers.
 - **ASM-006 — UTC time semantics:** Stored and compared timestamps use an approved UTC representation. Baseline links do not expire under RDR-002; a future expiration capability would require a separately approved boundary.
@@ -485,7 +485,7 @@ These criteria define the approved baseline. They are not implementation evidenc
 - **AC-005:** Concurrent creation requests preserve the approved uniqueness, duplicate, and idempotency behavior.
 - **AC-006:** Given a known active code, resolution returns the approved redirect status and approved exact `Location` representation.
 - **AC-007:** Malformed, unknown, expired, and disabled codes produce their approved outcomes without an incorrect redirect.
-- **AC-008:** Baseline creation rejects expiration inputs, links have no expiration state, and no cache can introduce unapproved lifecycle behavior.
+- **AC-008:** Baseline creation rejects expiration inputs, links have no expiration state, and the cache does not introduce unapproved lifecycle behavior.
 - **AC-009:** Database failure never creates false success or a false not-found result and follows the approved client and cache-fallback policy.
 - **AC-010:** Analytics records exactly the request classes included in the approved click definition.
 - **AC-011:** Retry, refresh, prefetch, and suspected-bot events follow the approved analytics policy.

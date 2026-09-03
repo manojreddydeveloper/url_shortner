@@ -8,6 +8,7 @@ import java.util.Base64;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.example.urlshortener.cache.LinkCache;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 import com.example.urlshortener.observability.OperationalMetrics;
@@ -23,28 +24,35 @@ public class LinkCreationService {
     private final DestinationUrlValidator validator;
     private final ShortCodeGenerator codeGenerator;
     private final LinkWriter writer;
+    private final LinkCache cache;
     private final SecureRandom tokenRandom;
     private final Clock clock;
     private final OperationalMetrics metrics;
 
     @Autowired
     public LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
-            LinkWriter writer, ObjectProvider<OperationalMetrics> metrics) {
-        this(validator, codeGenerator, writer, new SecureRandom(), Clock.systemUTC(), metrics.getIfAvailable());
+            LinkWriter writer, LinkCache cache, ObjectProvider<OperationalMetrics> metrics) {
+        this(validator, codeGenerator, writer, cache, new SecureRandom(), Clock.systemUTC(), metrics.getIfAvailable());
     }
     public LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
-            LinkRepository repository) { this(validator, codeGenerator, new LinkWriter(repository), new SecureRandom(), Clock.systemUTC()); }
+            LinkRepository repository) {
+        this(validator, codeGenerator, new LinkWriter(repository), new LinkCache(10_000), new SecureRandom(), Clock.systemUTC());
+    }
+    public LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
+            LinkRepository repository, LinkCache cache, SecureRandom tokenRandom, Clock clock) {
+        this(validator, codeGenerator, new LinkWriter(repository), cache, tokenRandom, clock);
+    }
     LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
             LinkRepository repository, SecureRandom tokenRandom, Clock clock) {
-        this(validator, codeGenerator, new LinkWriter(repository), tokenRandom, clock);
+        this(validator, codeGenerator, new LinkWriter(repository), new LinkCache(10_000), tokenRandom, clock);
     }
     LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
-            LinkWriter writer, SecureRandom tokenRandom, Clock clock) {
-        this(validator, codeGenerator, writer, tokenRandom, clock, null);
+            LinkWriter writer, LinkCache cache, SecureRandom tokenRandom, Clock clock) {
+        this(validator, codeGenerator, writer, cache, tokenRandom, clock, null);
     }
     private LinkCreationService(DestinationUrlValidator validator, ShortCodeGenerator codeGenerator,
-            LinkWriter writer, SecureRandom tokenRandom, Clock clock, OperationalMetrics metrics) {
-        this.validator = validator; this.codeGenerator = codeGenerator; this.writer = writer;
+            LinkWriter writer, LinkCache cache, SecureRandom tokenRandom, Clock clock, OperationalMetrics metrics) {
+        this.validator = validator; this.codeGenerator = codeGenerator; this.writer = writer; this.cache = cache;
         this.tokenRandom = tokenRandom; this.clock = clock; this.metrics = metrics;
     }
 
@@ -57,9 +65,14 @@ public class LinkCreationService {
         for (int attempt = 1; attempt <= ShortCodeGenerator.MAX_ATTEMPTS; attempt++) {
             try {
                 String code = codeGenerator.generate();
-                writer.save(new LinkEntity(code, url, hash, Instant.now(clock)));
+                Instant createdAt = Instant.now(clock);
+                LinkEntity saved = writer.save(new LinkEntity(code, url, hash, createdAt));
+                if (cache != null) {
+                    cache.put(saved);
+                    if (metrics != null) metrics.cache("write");
+                }
                 metric(Outcome.SUCCESS);
-                return new Result(code, url, Instant.now(clock), Base64.getUrlEncoder().withoutPadding().encodeToString(token));
+                return new Result(code, url, createdAt, Base64.getUrlEncoder().withoutPadding().encodeToString(token));
             } catch (DataIntegrityViolationException collision) {
                 if (!isShortCodeCollision(collision)) { metric(Outcome.DEPENDENCY_FAILURE); throw new DependencyUnavailableException(); }
                 if (!codeGenerator.mayRetryCollision(attempt)) {

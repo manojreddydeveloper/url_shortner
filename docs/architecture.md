@@ -64,6 +64,7 @@ flowchart LR
 | URL policy | Structural URL validation and approved preservation or normalization | Network fetching or destination reputation |
 | Link creation | Coordinates validation, token/code generation, and durable mapping creation | HTTP formatting and analytics aggregation |
 | Code generator | Produces candidate short codes from an approved secure random source | Uniqueness authority |
+| Mapping cache | Stores hot resolved mappings in process memory for redirect read-through and creation write-through | Authoritative state, invalidation policy, shared coordination |
 | Mapping repository | Authoritative create and lookup operations and error classification | Redirect status or API errors |
 | Link resolver | Validates codes and classifies active, unknown, expired, and dependency-failed outcomes | HTTP response formatting |
 | Redirect handler | Converts resolution outcomes to the approved HTTP response | Mapping consistency rules |
@@ -102,7 +103,7 @@ If retry-safe creation becomes required, add an explicit idempotency-key contrac
 
 1. The edge forwards `GET /{code}` to the application. Static API and health routes take precedence over the fixed-length code route.
 2. The HTTP layer rejects codes that do not match the approved format before a database or cache lookup.
-3. The repository queries PostgreSQL by the case-sensitive short code; the baseline has no cache lookup.
+3. The resolver checks the process-local positive cache first and falls back to PostgreSQL on a cache miss.
 4. The resolver distinguishes:
    - active mapping;
    - unknown mapping;
@@ -219,24 +220,30 @@ Ten Base62 characters provide `62^10`, approximately `8.39 × 10^17`, possible c
 | UUID in URL | Built-in library support and negligible collision risk | Long links undermine the product goal | Not part of the baseline |
 | Separate ID service | Global control at very high scale | New network hop, service, availability domain, and operations | Not needed |
 
-## 7. Redis usage
+## 7. Redirect cache and Redis
 
 ### Baseline decision
 
-Redis is **not required in the baseline**. The approved single-instance scale envelope does not justify another stateful dependency.
+The approved baseline uses a bounded process-local positive cache for hot mappings. Redis is **not required in the baseline**. The approved single-instance scale envelope does not justify another shared stateful dependency.
 
-### Conditional cache use
+### In-memory cache use
 
-If performance validation shows PostgreSQL lookup cannot meet the approved redirect objective, use Redis as a cache-aside optimization:
+The cache is a read-through and write-through optimization for immutable mappings:
 
-- Key: a namespaced short-code value, without raw destination in the key.
-- Value: destination plus authoritative expiration time and only other fields required for resolution.
-- Positive entries only initially; do not negative-cache unknown codes without a separate decision.
-- TTL: the smaller of the approved cache TTL and remaining link lifetime.
-- On miss or Redis error: query PostgreSQL.
-- PostgreSQL remains authoritative.
-- Because baseline links are immutable, ordinary invalidation is unnecessary. Any future disable, delete, or edit feature must add explicit invalidation.
-- During PostgreSQL outage, serving a cache hit requires a separate stale-read availability decision; it is not automatically enabled.
+- Key: the case-sensitive short code.
+- Value: the resolved `LinkEntity`.
+- Positive entries only; do not negative-cache unknown codes.
+- Eviction: least-recently-used, bounded by the configured maximum entry count.
+- On hit: return the cached mapping without a datastore round trip.
+- On miss: query PostgreSQL and populate the cache on success.
+- On creation success: write through the persisted mapping after the durable transaction commits.
+- PostgreSQL remains authoritative on miss and for any cache entry that is evicted or absent.
+- Because links are immutable in the approved baseline, the cache does not need invalidation for edits or expiration. Any future disable, delete, or edit feature must add explicit invalidation.
+- A cached hit can still be served if PostgreSQL is temporarily unavailable; cache misses still depend on PostgreSQL.
+
+### Redis usage
+
+Redis remains unavailable in the baseline. If a later decision approves a shared cache or distributed rate-limit state, Redis can be reconsidered with explicit TTL, invalidation, negative-cache, and outage semantics.
 
 ### Conditional distributed rate-limit use
 
@@ -345,7 +352,7 @@ Planned bounded metrics include:
 - creation success, validation rejection, collision retry, and datastore failure;
 - redirect active, unknown, rate-limited, and dependency-failed outcomes (expired and disabled states are absent from the baseline);
 - database query duration, timeout, error, and connection-pool saturation;
-- no cache metrics in the baseline (Redis metrics only if a later decision approves Redis);
+- cache hit/miss metrics in the baseline; Redis metrics only if a later decision approves Redis;
 - analytics event attempted, stored, failed, timed out, and queried;
 - rate-limit allow and reject counts;
 - readiness and process lifecycle state.
@@ -366,7 +373,7 @@ In-process correlation is required. Distributed tracing is not a baseline depend
 ### Health and alerts
 
 - Liveness indicates that the process can execute, not that every dependency is available.
-- Readiness indicates that the instance can safely serve approved traffic; PostgreSQL is expected to be required in the no-cache baseline.
+- Readiness indicates that the instance can safely serve approved traffic; PostgreSQL is still required on cache miss and for cache warm-up.
 - Alerts cover the RDR-004 thresholds for unexpected 5xx, latency, readiness, datastore failures, analytics loss, rate limiting, collision retries/exhaustion, saturation, and analytics deletion lag. Routing and ownership remain deployment-specific.
 - OBS-IMPL-001 in `TASKS.md` owns implementation and synthetic validation of these metrics and alerts.
 
@@ -376,7 +383,7 @@ In-process correlation is required. Distributed tracing is not a baseline depend
 | --- | --- | --- |
 | Database calls | Bounded pool acquisition (250 ms, the supported HikariCP minimum), lookup (150 ms), creation (500 ms), analytics append (50 ms), and analytics query (1 s); no automatic dependency retry | Timeout, pool saturation, dependency error, and resulting `503` metrics/logs |
 | Retry policy | Only recognized code-uniqueness conflicts retry, with five new candidates | Collision retry/exhaustion counters and sampled logs |
-| Cache | No baseline cache; redirects use `Cache-Control: no-store`; unknown codes are not negative-cached | Architecture conformance; no cache failure can mask datastore failure |
+| Cache | Bounded process-local positive cache for hot mappings; redirects use `Cache-Control: no-store`; unknown codes are not negative-cached | Cache hit/miss, write-through, and fallback behavior |
 | Lifecycle | PostgreSQL-required readiness, dependency-independent liveness, and a maximum 30-second graceful drain | Health transitions, lifecycle state, and unready alerts |
 | Recovery | Backup, restore, RTO, and RPO commitments are deferred outside the prototype | Explicit deferral; no production guarantee inferred |
 | Telemetry | Structured privacy-safe logs, bounded metrics, and in-process correlation; distributed tracing requires separate approval | Alerts for latency, 5xx, dependency, analytics-loss, saturation, abuse, and cleanup objectives |
@@ -391,7 +398,7 @@ Any future cache, retry, buffer, or distributed tracing addition requires measur
 | Edge to application | Only configured edge addresses are trusted to supply forwarding metadata | Trusted-proxy allowlist, forwarded-header validation, configured public base URL |
 | API to domain modules | Decoded values remain untrusted until domain validation succeeds | Typed validation results, length and character limits, no implicit normalization |
 | Application to PostgreSQL | Database is authoritative but can fail or return no row | Parameterized operations, least privilege, TLS if networked, bounded timeouts, error classification |
-| Application to Redis | Optional cache/limit state is non-authoritative and may be stale or unavailable | Namespaced keys, authenticated private access, bounded TTL, fallback policy |
+| Application to Redis | Redis is not baseline state; if approved later, optional cache/limit state is non-authoritative and may be stale or unavailable | Namespaced keys, authenticated private access, bounded TTL, fallback policy |
 | Application to telemetry | Telemetry destination is not allowed to receive product secrets or personal data | Field allowlist, redaction, bounded labels, access and retention controls |
 | Analytics caller to API | Possession of a public short URL does not automatically authorize analytics | Proposed per-link management token, hash storage, constant-time verification, rate limits |
 
@@ -417,7 +424,7 @@ Tradeoffs: this is simpler than accounts and tenants, but a lost token cannot be
 | --- | --- | --- |
 | Unit and property | Validate pure rules and invariants quickly | URL matrix, code format and collision retry, lifecycle boundaries, traffic classification, error mapping |
 | Component | Exercise a module with controlled external boundaries | Creation orchestration, resolver outcomes, analytics insert failure, rate token bucket |
-| Integration | Validate the real selected datastore and optional Redis | Constraints, transactions, migrations, SQL aggregation, cache TTL and outage |
+| Integration | Validate the real selected datastore and process-local cache; optional Redis only if later approved | Constraints, transactions, migrations, SQL aggregation, cache hit/miss and outage |
 | API contract | Prove documented wire behavior | Status, headers, schemas, auth, rate limits, error envelope |
 | Concurrency | Prove correctness under simultaneous work | Unique insertion, duplicate requests, lookup during lifecycle boundaries |
 | Fault injection | Prove approved degradation | Database timeout/outage, analytics failure, Redis failure, shutdown with work in flight |
@@ -431,7 +438,7 @@ Use narrow replaceable boundaries only where control is required:
 - approved clock for expiration and time buckets;
 - approved secure random source for deterministic collision tests;
 - mapping and analytics repositories at the database boundary;
-- optional cache and rate-limit store boundary;
+- cache and rate-limit store boundaries where needed;
 - telemetry capture sink for schema and redaction assertions.
 
 Production behavior must be validated against real PostgreSQL integration tests, not only mocks. Optional Redis behavior must be tested against the approved Redis version if introduced. Tests use synthetic destinations and must not make external network requests.
@@ -453,7 +460,7 @@ Production behavior must be validated against real PostgreSQL integration tests,
 | Separate analytics service | Analytics is small and shares mapping identity and storage | Independent scaling and failure domain | Requires delivery protocol, deployment, auth, versioning, and more operations | Keep analytics as an internal module |
 | Separate ID-generation service | Random generation needs no central sequence | Central allocation at extreme coordinated scale | New critical network dependency and availability problem | Generate codes in application instances |
 | Distributed locking | Database uniqueness and Redis atomic operations cover identified races | General cross-node mutual exclusion | Lease expiry, deadlocks, split brain, latency, difficult failure testing | Do not use |
-| Redis | No approved baseline latency or replica coordination need | Fast cache and shared rate-limit state | Additional stateful dependency, stale data, outage and operational complexity | Defer; add only on evidence |
+| Redis | No approved baseline latency or replica coordination need | Fast shared cache and rate-limit state | Additional stateful dependency, stale data, outage and operational complexity | Defer; add only on evidence |
 | PostgreSQL outbox | No approved durable analytics-delivery guarantee yet | Durable handoff without Kafka | More tables, polling, cleanup, delivery duplication | Defer until loss tolerance requires it |
 | In-process analytics queue | Could reduce redirect write latency | Simple batching without external system | Process-crash loss, backpressure and shutdown complexity | Not baseline; consider after measurement |
 
@@ -463,7 +470,7 @@ Architecture expansion requires a measured or approved trigger:
 
 | Trigger | First response to evaluate |
 | --- | --- |
-| PostgreSQL lookup misses redirect latency target | Query/index analysis, then cache-aside Redis if evidence supports it |
+| PostgreSQL lookup misses redirect latency target | Query/index analysis, then tune the bounded in-memory cache size and hit ratio before any shared cache |
 | Multiple replicas require strict global rate limits | Redis or approved edge-level shared limiter |
 | Analytics insert exceeds redirect overhead | In-process batching if crash loss is acceptable; otherwise PostgreSQL outbox |
 | Analytics volume makes query aggregation too slow | Time-bucket aggregate table or partitioning before a new service |

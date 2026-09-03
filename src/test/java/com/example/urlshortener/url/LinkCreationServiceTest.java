@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.security.SecureRandom;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import com.example.urlshortener.cache.LinkCache;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,6 +26,19 @@ class LinkCreationServiceTest {
         var service = new LinkCreationService(new DestinationUrlValidator(), gen, repo, new SecureRandom(), Clock.fixed(Instant.EPOCH, ZoneOffset.UTC));
         var result = service.create("https://example.com/path");
         assertEquals("aZ3kP9mQ2x", result.code()); assertEquals(43, result.analyticsToken().length()); verify(repo).saveAndFlush(any(LinkEntity.class));
+    }
+    @Test void writesThroughTheCacheAfterDurableCreate() {
+        LinkWriter writer = mock(LinkWriter.class);
+        LinkCache cache = mock(LinkCache.class);
+        ShortCodeGenerator gen = mock(ShortCodeGenerator.class);
+        when(gen.generate()).thenReturn("aZ3kP9mQ2x");
+        when(writer.save(any())).thenAnswer(i -> i.getArgument(0));
+        var service = new LinkCreationService(new DestinationUrlValidator(), gen, writer, cache,
+                new SecureRandom(), Clock.fixed(Instant.EPOCH, ZoneOffset.UTC));
+        var result = service.create("https://example.com/path");
+        assertEquals("aZ3kP9mQ2x", result.code());
+        verify(cache).put(any(LinkEntity.class));
+        verify(writer).save(any(LinkEntity.class));
     }
     @Test void retriesOnlyUniqueCollisionsAndStopsAfterSixAttempts() {
         LinkRepository repo = mock(LinkRepository.class); ShortCodeGenerator gen = mock(ShortCodeGenerator.class);
