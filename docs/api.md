@@ -216,6 +216,7 @@ Semantics:
 - `all` includes every stored event in the range.
 - `suspectedAutomated` is heuristic and does not establish automated identity with certainty.
 - `unclassified` must not be labeled “human” or “unique visitor.”
+- `buckets` contains event-bearing UTC days only; an authorized range with no events returns zero totals and an empty `buckets` array.
 - The API does not expose raw click events, IP addresses, user agents, referrers, or destinations.
 - Counts are best-effort under the approved analytics failure policy and are not exactly once.
 

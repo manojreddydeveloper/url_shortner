@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-021
+
+- **Prompt ID:** PROMPT-021
+- **Task ID:** ANL-003
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Implement the approved token-protected analytics retrieval API.
+- **Context Provided:** ANL-003 in `TASKS.md`; accepted ARC-002, ARC-004, and ANL-002; approved token, anti-enumeration, aggregate, UTC range, retention, snapshot, freshness, privacy, and error contracts.
+- **Constraints:** Execute only ANL-003; accept credentials only through `Authorization: Bearer`; expose aggregates rather than raw events; add no rate limiter, dependency timeout, new dependency, or unrelated refactor.
+- **Acceptance Criteria:** Authorized results match approved aggregation/time boundaries; unauthorized access and enumeration are prevented; empty and failure outcomes are safe; responses make no unique-human or exactly-once claim.
+- **AI Output Summary:** Added a repeatable-read analytics query service with constant-time SHA-256 bearer verification, strict range/bucket validation, retention filtering, aggregate mapping, and safe failure classification; added the analytics controller and focused service/contract/privacy tests; documented event-bearing bucket behavior.
+- **Files Changed:** `src/main/java/com/example/urlshortener/analytics/AnalyticsQueryService.java`, `src/main/java/com/example/urlshortener/web/AnalyticsController.java`, corresponding tests, `docs/api.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Standing engineer approval for subsequent flows was granted on 2026-09-02; PostgreSQL integration and later timeout/rate-limit behavior remain separately scoped.
+- **Accepted Output:** Token-protected aggregate query service and API, range/default/retention rules, anti-enumeration behavior, safe errors, privacy boundary, and focused tests.
+- **Edited Output:** Initial mocked zero-total setup caused an unfinished Mockito stubbing failure and was corrected without production behavior changes.
+- **Rejected Output:** Public/raw analytics, query-string credentials, synthetic zero-day buckets, unique-human claims, exactly-once claims, and scope expansion into rate limiting or timeout infrastructure.
+- **Rejection Reason:** These conflict with the approved contract, are not required, or belong to later tasks.
+- **Validation:** Focused ANL-003 tests and the complete Gradle `check` lifecycle passed; `git diff --check` passed.
+- **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home check --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 12 seconds with 4 actionable tasks. JUnit XML reports contain 66 tests, 0 failures, 0 errors, and 0 skipped tests.
+- **Engineer Approval:** APPROVED under the engineer's standing authorization for subsequent flows on 2026-09-02.
+
 ### PROMPT-020
 
 - **Prompt ID:** PROMPT-020
 - **Task ID:** ANL-002
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement approved analytics persistence, aggregation primitives, fail-open delivery behavior, and 90-day retention cleanup.
 - **Context Provided:** ANL-002 in `TASKS.md`; accepted ANL-001 and ARC-004; approved analytics data, privacy, consistency, loss, no-retry/no-buffer, UTC aggregation, and deletion boundaries.
 - **Constraints:** Execute only ANL-002; persist only link ID, UTC event time, and coarse traffic class; use the existing PostgreSQL/JPA/Flyway stack; add no queue, retry, buffer, separate datastore, API, authorization, or new dependency; leave the hard append timeout to REL-IMPL-001.
 - **Acceptance Criteria:** Stored and aggregated data follows approved time/privacy boundaries; independent eligible requests remain independent events; append loss is observable and fail-open; physical cleanup is enforceable within 24 hours; no buffered lifecycle exists.
 - **AI Output Summary:** Added the click-event entity, repository, PostgreSQL aggregate queries, one-attempt JPA sink, V2 migration, hourly UTC retention cleanup, privacy-safe append/cleanup failure evidence, and focused mapping, query-contract, schema, duplicate, failure, and retention tests.
 - **Files Changed:** `src/main/java/com/example/urlshortener/analytics/AnalyticsCapture.java`, `AnalyticsRetention.java`, `AnalyticsSchedulingConfiguration.java`, `ClickEventEntity.java`, `ClickEventRepository.java`, `JpaEventSink.java`, `src/main/resources/db/migration/V2__create_click_events.sql`, analytics tests, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review PostgreSQL-native aggregate SQL, event schema, hourly deletion boundary, lazy repository behavior for non-JPA test contexts, privacy-safe failure logs, and the documented validation limitation.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** Standing engineer approval for subsequent flows was granted on 2026-09-02 after the engineer reported review of the completed task.
+- **Accepted Output:** PostgreSQL event schema and persistence, aggregate query primitives, single-attempt fail-open behavior, privacy-safe failure evidence, and hourly retention cleanup.
+- **Edited Output:** Constructor and conditional-wiring regressions found during validation were corrected; focused storage and failure tests were strengthened.
+- **Rejected Output:** Retry, queue, buffer, separate datastore/service, and raw or prohibited analytics fields.
+- **Rejection Reason:** These conflict with the approved minimal, fail-open analytics architecture.
 - **Validation:** Analytics-focused tests passed; the full Gradle test suite passed; `git diff --check` passed. Docker is installed but its daemon is unavailable, so the migration and native aggregate SQL were not executed against live PostgreSQL.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds with 4 actionable tasks. JUnit XML reports contain 55 tests, 0 failures, 0 errors, and 0 skipped tests.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 under the engineer's standing authorization for subsequent flows.
 
 ### PROMPT-019
 
