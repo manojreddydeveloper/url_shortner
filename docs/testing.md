@@ -25,4 +25,4 @@ Run it from a clean build when validating reproducibility:
 ./gradlew clean test --rerun-tasks --no-daemon
 ```
 
-TST-001 requires two consecutive successful executions. TST-002 will document the isolated PostgreSQL command and environment when that dependency is available.
+TST-001 requires two consecutive successful executions. TST-002 will document the isolated PostgreSQL command and the Docker Compose environment for the approved runtime baseline when that dependency is exercised.

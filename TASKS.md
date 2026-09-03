@@ -2,6 +2,8 @@
 
 This backlog is derived from `ENGINEERING_PLAN.md`. It describes future work but does not authorize application-code implementation or dependency installation.
 
+PostgreSQL is already the approved runtime datastore and is wired through Docker Compose in the repository. The architecture tasks below now cover the remaining runtime-adjacent choices, integration details, and any future dependency changes around that baseline.
+
 ## Task classification
 
 - **AI-friendly:** AI can efficiently draft, analyze, generate tests, or review the work. All output still requires engineer validation.
@@ -99,7 +101,7 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Title:** Select system boundaries and technical stack
 - **Classification:** AI-friendly: Yes; Engineer-heavy: Yes; High-impact: Yes
 - **Intent:** Choose the smallest architecture and dependency set justified by approved requirements.
-- **Description:** Compare credible runtime, framework, datastore, deployment, and component-boundary options. Include a no-cache and no-queue baseline unless requirements rule them out.
+- **Description:** Compare the remaining runtime-adjacent framework, deployment, and component-boundary options around the approved PostgreSQL runtime baseline. Include a no-cache and no-queue baseline unless requirements rule them out.
 - **Dependencies:** REQ-004
 - **Acceptance Criteria:**
   1. Selected and rejected alternatives are compared against approved functional and quality targets.

@@ -2,12 +2,12 @@
 
 ## Document status
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
-- **Scope:** API contract design only
-- **Implementation authorized:** No
+- **Status:** APPROVED
+- **Scope:** API contract baseline and implementation constraints
+- **Implementation authorized:** Yes, within the approved baseline
 - **Related requirements:** FR-001 through FR-011, SEC-001 through SEC-010, REL-001 through REL-012
 
-This contract reflects the ARC-001 architecture proposal and the approved RDR-001 through RDR-004 requirements. The wire-level choices in this document remain proposed until ARC-002 receives explicit engineer approval.
+This contract reflects the approved ARC-001 architecture baseline and the approved RDR-001 through RDR-004 requirements. The wire-level choices in this document are approved at the contract level; remaining implementation details are recorded as documented open choices where applicable.
 
 ## Conventions
 
@@ -313,7 +313,7 @@ The following cases are the contract-test baseline. They are documentation evide
 
 ## 9. Open contract decisions
 
-The following wire-level details remain proposed for engineer review; they do not change the approved requirements:
+The following wire-level details remain open for engineer review; they do not change the approved requirements:
 
 1. Exact JSON property naming and whether `details` is omitted or returned as an empty list.
 2. Whether creation includes an HTTP `Location` header for a future link-resource endpoint; no such endpoint is part of the baseline.
@@ -324,4 +324,4 @@ The following wire-level details remain proposed for engineer review; they do no
 
 ## Approval gate
 
-This document is a proposed contract. It must be reviewed alongside `docs/architecture.md` and the ARC-002 record in `DECISIONS.md`. Approval must be recorded before creation, redirect, or analytics implementation tasks become ready.
+This document is the approved contract baseline. It must be reviewed alongside `docs/architecture.md` and the ARC-002 record in `DECISIONS.md`. Any later wire-level changes must be recorded before creation, redirect, or analytics implementation tasks change.

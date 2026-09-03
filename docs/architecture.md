@@ -2,12 +2,12 @@
 
 ## Document status
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
-- **Scope:** Architecture design only
-- **Implementation authorized:** No
+- **Status:** APPROVED — BASELINE DOCUMENTED
+- **Scope:** Architecture baseline and implementation constraints
+- **Implementation authorized:** Yes, within the approved baseline
 - **Source:** `ENGINEERING_PLAN.md`, `TASKS.md`, and `TRACEABILITY.md`
 
-This proposal chooses the smallest architecture that can satisfy the currently normalized requirements. Major choices are recorded as proposed decisions in `DECISIONS.md`; they are not approved merely because they appear here.
+This document captures the approved baseline architecture for the current prototype. Major choices are recorded in `DECISIONS.md`; approval of this document does not replace task-level acceptance for implementation evidence.
 
 REQ-001 through REQ-004 establish the functional and prototype quality baseline. Exact wire schemas remain ARC-002 work, persistence details remain ARC-003 work, and deployment-specific telemetry routing remains ARC-005 work.
 
@@ -16,23 +16,23 @@ REQ-001 through REQ-004 establish the functional and prototype quality baseline.
 1. Start with one deployable application and one authoritative relational database.
 2. Keep creation, redirect, analytics, and operations as internal modules with explicit boundaries.
 3. Use database constraints for correctness instead of distributed coordination.
-4. Keep redirect availability independent of analytics success under the proposed fail-open policy.
+4. Keep redirect availability independent of analytics success under the approved fail-open policy.
 5. Collect the minimum analytics data needed for the approved report.
 6. Add Redis, queues, services, or replicas only when an approved requirement or measured result justifies them.
 7. Make external boundaries replaceable and testable without creating speculative internal frameworks.
 
-### Proposed technical stack
+### Approved technical stack
 
-| Concern | Proposed choice | Rationale and boundary |
+| Concern | Approved choice | Rationale and boundary |
 | --- | --- | --- |
 | Language/runtime | Java 21 (or the engineer-approved project JDK) | Strong typing and mature Spring ecosystem; the runtime version must match the build environment. |
 | Build | Gradle with the existing wrapper and dependency lock | Reproducible builds and no build-tool installation requirement. |
 | Application framework | Spring Boot | One deployable HTTP application with configuration, lifecycle, health, and test integration. |
 | Persistence | Spring Data JPA/Hibernate against PostgreSQL | Transactional mapping creation, case-sensitive uniqueness, indexed lookup, and analytics range queries. Hibernate is an implementation detail behind repository boundaries. |
-| Baseline stateful services | One PostgreSQL datastore | Authoritative mappings and minimal click events; no Redis, Kafka, queue, or second datastore. |
+| Baseline stateful services | One PostgreSQL datastore | Authoritative mappings and minimal click events; no Redis, Kafka, queue, or second datastore. Docker Compose provides the local app-plus-database runtime. |
 | Deployment | Single-region, single-application-instance prototype | Matches the approved validation envelope; replicas and multi-region operation require a new decision. |
 
-The selected dependency set is intentionally limited to the existing Java/Spring/Gradle foundation plus the approved PostgreSQL/Hibernate persistence path. No dependency is installed by ARC-001. The engineer must approve this proposed stack before project-foundation dependency changes are accepted.
+The selected dependency set is intentionally limited to the existing Java/Spring/Gradle foundation plus the approved PostgreSQL/Hibernate persistence path. No dependency is installed by ARC-001. Future dependency changes still require engineer review, but the PostgreSQL runtime baseline is already approved and reflected in the repository.
 
 ## 1. Component architecture
 
@@ -86,12 +86,12 @@ The modules are logical boundaries inside one process and one repository. They a
 6. In a database transaction, the repository inserts the mapping and the one-way hash of the analytics token.
 7. A unique-code conflict causes a new candidate and bounded retry. No existing row is overwritten.
 8. Other database failures produce `503 Service Unavailable`; the API never returns false success or treats an uncertain write as a duplicate.
-9. The API returns the proposed `201 Created` response using a configured public base URL. The plaintext analytics token is returned only in this response and is not stored or logged.
+9. The API returns the approved `201 Created` response using a configured public base URL. The plaintext analytics token is returned only in this response and is not stored or logged.
 10. Operational metrics and privacy-safe logs record the outcome without the raw destination, management token, or client IP.
 
 ### Duplicate and retry behavior
 
-The proposed baseline creates a new mapping for each ordinary request, even when the destination already exists. Creation is non-idempotent until a separate idempotency policy is approved. This avoids destination-based information leakage and avoids coupling unrelated links' expiration and analytics, but a client that retries after losing a success response may create another link.
+The approved baseline creates a new mapping for each ordinary request, even when the destination already exists. Creation is non-idempotent until a separate idempotency policy is approved. This avoids destination-based information leakage and avoids coupling unrelated links' expiration and analytics, but a client that retries after losing a success response may create another link.
 
 If retry-safe creation becomes required, add an explicit idempotency-key contract scoped to an approved client identity. Do not implement destination deduplication as implicit idempotency.
 
@@ -141,7 +141,7 @@ flowchart LR
 ```
 
 - Raw IP addresses are used transiently only if required for rate limiting and are not stored in analytics.
-- Raw user-agent and referrer values are not stored in the proposed baseline.
+- Raw user-agent and referrer values are not stored in the approved baseline.
 - Bot classification may inspect a user-agent transiently, then store only `suspected_bot` or `unknown`.
 - Analytics tokens are stored only as cryptographic hashes.
 - Operational telemetry and product analytics use different schemas and access paths.
@@ -178,7 +178,7 @@ Indexes and constraints:
 | Column | Proposed PostgreSQL type | Nullability/source | Purpose, constraints, and retention |
 | --- | --- | --- | --- |
 | `id` | `BIGINT GENERATED BY DEFAULT AS IDENTITY` | Not null; database-generated | Internal event key; not exposed; retained with the event. |
-| `link_id` | `BIGINT` | Not null; foreign key from the resolved mapping | Associates the event with `links.id`; `ON DELETE RESTRICT` is proposed because mapping deletion is outside the baseline. |
+| `link_id` | `BIGINT` | Not null; foreign key from the resolved mapping | Associates the event with `links.id`; `ON DELETE RESTRICT` is used because mapping deletion is outside the baseline. |
 | `occurred_at` | `TIMESTAMPTZ` | Not null; application UTC clock at the click boundary | Event time for retention and inclusive-start/exclusive-end daily aggregation; physically delete at or beyond the 90-day boundary within 24 hours. |
 | `traffic_class` | `VARCHAR(24)` or constrained enum | Not null; transient classifier output | Only `suspected_automated` or `unclassified`; never represents verified human identity. |
 
@@ -212,8 +212,8 @@ Ten Base62 characters provide `62^10`, approximately `8.39 × 10^17`, possible c
 | --- | --- | --- | --- |
 | Random Base62 | Decentralized generation, non-sequential, simple horizontal scaling | Requires collision handling; case must be preserved | Proposed baseline |
 | Encoded database ID | Collision-free and short | Predictable and enumerable; exposes volume; couples code to storage | Rejected for current security posture |
-| Hash of destination | Stable deduplication | Conflicts with proposed duplicate semantics; collision and canonicalization complexity; information leakage | Not proposed |
-| UUID in URL | Built-in library support and negligible collision risk | Long links undermine the product goal | Not proposed |
+| Hash of destination | Stable deduplication | Conflicts with approved duplicate semantics; collision and canonicalization complexity; information leakage | Not part of the baseline |
+| UUID in URL | Built-in library support and negligible collision risk | Long links undermine the product goal | Not part of the baseline |
 | Separate ID service | Global control at very high scale | New network hop, service, availability domain, and operations | Not needed |
 
 ## 7. Redis usage
@@ -239,7 +239,7 @@ If performance validation shows PostgreSQL lookup cannot meet the approved redir
 
 For one application instance, a bounded in-memory token bucket is simplest. If multiple instances require a strict shared limit, Redis can provide an atomic token bucket using an approved server-side operation and expiring keys. Rate-limit identity should be an HMAC or other approved pseudonymous derivation rather than a raw IP in the key.
 
-Redis is not proposed as the source of truth, primary analytics store, distributed lock manager, or baseline event queue.
+Redis is not part of the baseline as the source of truth, primary analytics store, distributed lock manager, or event queue.
 
 ## 8. Analytics architecture
 
@@ -290,7 +290,7 @@ A separate service does not remove the need for event delivery, storage, privacy
 
 ### Scaling tradeoff
 
-In-memory limiting is simple and has no network dependency, but it resets on restart and is per-instance. If strict global limits across replicas are required, move the token-bucket state to Redis or an approved edge gateway. Database-backed request limiting is not proposed because it adds load and contention to the authoritative mapping database.
+In-memory limiting is simple and has no network dependency, but it resets on restart and is per-instance. If strict global limits across replicas are required, move the token-bucket state to Redis or an approved edge gateway. Database-backed request limiting is not part of the baseline because it adds load and contention to the authoritative mapping database.
 
 ## 10. Error handling
 
@@ -330,7 +330,7 @@ API errors use one envelope:
 | Mapping database unavailable | `503 Service Unavailable` | May include bounded `Retry-After` |
 | Internal or generation exhaustion | `500 Internal Server Error` | Operational detail only in safe logs |
 
-Analytics insert failure is not returned to a redirecting client under the proposed fail-open policy. It is captured through operational metrics and logs.
+Analytics insert failure is not returned to a redirecting client under the approved fail-open policy. It is captured through operational metrics and logs.
 
 ## 11. Observability
 
