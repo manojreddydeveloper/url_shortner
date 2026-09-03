@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import com.example.urlshortener.web.RequestCorrelationFilter;
 
@@ -56,6 +58,41 @@ public final class GlobalExceptionHandler {
                 RequestCorrelationFilter.from(request),
                 null);
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<ApiErrorResponse> handleUnsupportedMediaType(
+            HttpMediaTypeNotSupportedException exception,
+            HttpServletRequest request) {
+        ApiErrorResponse response = ApiErrorResponse.of(
+                "UNSUPPORTED_MEDIA_TYPE",
+                "The request media type is not supported.",
+                RequestCorrelationFilter.from(request),
+                null);
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiErrorResponse> handleMessageNotReadable(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request) {
+        Throwable cause = exception.getMostSpecificCause();
+        String causeMessage = cause == null ? "" : String.valueOf(cause.getMessage());
+        String exceptionMessage = String.valueOf(exception.getMessage());
+        boolean unknownField = causeMessage.toLowerCase().contains("unrecognized field")
+                || causeMessage.toLowerCase().contains("unknown property")
+                || exceptionMessage.toLowerCase().contains("unrecognized field")
+                || exceptionMessage.toLowerCase().contains("unknown property");
+        String code = unknownField ? "VALIDATION_ERROR" : "INVALID_JSON";
+        String message = unknownField
+                ? "The request contains invalid fields."
+                : "The request body is not valid JSON.";
+        ApiErrorResponse response = ApiErrorResponse.of(
+                code,
+                message,
+                RequestCorrelationFilter.from(request),
+                null);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)

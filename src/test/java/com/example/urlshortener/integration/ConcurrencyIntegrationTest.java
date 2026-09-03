@@ -15,16 +15,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import com.example.urlshortener.persistence.LinkRepository;
+import com.example.urlshortener.analytics.ClickEventRepository;
 
 class ConcurrencyIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     LinkRepository linkRepository;
 
+    @Autowired
+    ClickEventRepository clickEventRepository;
+
     private RestTemplate restTemplate;
 
     @BeforeEach
     void setUp() {
+        clickEventRepository.deleteAll();
+        linkRepository.deleteAll();
         restTemplate = new RestTemplate();
     }
 
@@ -100,5 +106,6 @@ class ConcurrencyIntegrationTest extends AbstractIntegrationTest {
         executor.shutdown();
 
         assertThat(codes).hasSize(threadCount);
+        assertThat(linkRepository.count()).isEqualTo(threadCount);
     }
 }

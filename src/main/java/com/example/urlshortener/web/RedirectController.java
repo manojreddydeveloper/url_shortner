@@ -25,4 +25,12 @@ public class RedirectController {
             case DEPENDENCY_UNAVAILABLE -> throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "DEPENDENCY_UNAVAILABLE", "The link service is temporarily unavailable.");
         };
     }
+
+    @RequestMapping(value = "/{code}", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> redirectHead(@PathVariable String code) {
+        throw new ApiException(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "METHOD_NOT_ALLOWED",
+                "The requested method is not supported.");
+    }
 }

@@ -640,12 +640,15 @@ Copy this template for every new material AI activity.
 
 ---
 
-### PROMPT-NNN
+### PROMPT-028
 
+- **Prompt ID:** PROMPT-028
 - **Task ID:** SEC-IMPL-002
-- **Purpose:** Implement approved identity, authorization, rate-limit, and abuse policies for creation and analytics endpoints
 - **Date:** 2026-09-03
+- **Status:** APPROVED
+- **Purpose:** Implement approved identity, authorization, rate-limit, and abuse policies for creation and analytics endpoints
 - **Context Provided:** SEC-IMPL-002 in `TASKS.md`; approved RDR-001 through RDR-004; accepted SEC-IMPL-001 threat model; existing `RateLimiter.java` skeleton, `OperationalMetrics` with rate-limit emitter, `GlobalExceptionHandler`, and `RequestCorrelationFilter`
+- **Constraints:** Execute only SEC-IMPL-002; preserve approved identity, authorization, and rate-limit semantics; do not add unrelated features or dependencies; keep rate-limit state bounded and privacy-safe; preserve unrelated staged changes.
 - **Acceptance Criteria:** Every protected operation enforces the approved identity and authorization policy; cross-owner or cross-tenant access is denied if ownership exists; rate-limit boundaries and recovery match approved policy; rejections use the approved response and retry metadata; rate-limit state and telemetry have approved bounds.
 - **AI Output Summary:** Created `RateLimiter` with trusted-proxy identity derivation from direct peer or X-Forwarded-For/X-Real-IP headers, in-memory token buckets (creation: 20 cap/10 per minute; analytics: 60 cap/60 per minute), 15-minute idle expiry; created `RateLimitInterceptor` wiring rate limiter into Spring MVC for POST /api/v1/links and GET /api/v1/links/*/analytics; created `RateLimitConfiguration` WebMvcConfigurer; created `RateLimitProperties` for trusted-proxy and rate-limit configuration; added 429 RATE_LIMITED handler in `GlobalExceptionHandler` with Retry-After header; wrote `RateLimiterTest` (9 tests covering quota enforcement, bucket separation, trusted-proxy identity derivation, idle purge), `RateLimitInterceptorTest` (6 tests covering 429 contract, Retry-After header, metric emission), and `RateLimitPropertiesTest` (3 tests covering defaults and valid values); verified end-to-end in Docker with 201 for allowed and 429 RATE_LIMITED with Retry-After for exceeded quota.
 - **Files Changed:** `src/main/java/com/example/urlshortener/observability/RateLimiter.java`, `src/main/java/com/example/urlshortener/web/RateLimitInterceptor.java`, `src/main/java/com/example/urlshortener/config/RateLimitConfiguration.java`, `src/main/java/com/example/urlshortener/config/RateLimitProperties.java`, `src/main/java/com/example/urlshortener/web/error/RateLimitException.java`, `src/main/java/com/example/urlshortener/web/error/GlobalExceptionHandler.java`, `src/test/java/com/example/urlshortener/observability/RateLimiterTest.java`, `src/test/java/com/example/urlshortener/web/RateLimitInterceptorTest.java`, `src/test/java/com/example/urlshortener/config/RateLimitPropertiesTest.java`, `TRACEABILITY.md`
@@ -660,12 +663,15 @@ Copy this template for every new material AI activity.
 
 ---
 
-### PROMPT-NNN
+### PROMPT-029
 
+- **Prompt ID:** PROMPT-029
 - **Task ID:** SEC-IMPL-003
-- **Purpose:** Complete security and privacy hardening review to confirm the system does not exceed approved data or dependency risk
 - **Date:** 2026-09-03
+- **Status:** APPROVED
+- **Purpose:** Complete security and privacy hardening review to confirm the system does not exceed approved data or dependency risk
 - **Context Provided:** SEC-IMPL-003 in `TASKS.md`; approved RDR-001 through RDR-004; accepted SEC-IMPL-001 threat model and SEC-IMPL-002 rate-limit implementation; existing `docs/security.md`, `docs/architecture.md`, `docs/api.md`, `DECISIONS.md`, `TRACEABILITY.md`; full source tree
+- **Constraints:** Execute only SEC-IMPL-003; document the security review without adding features; keep the review factual and evidence-based; do not silently widen the approved security boundary.
 - **Acceptance Criteria:** No secret or prohibited personal data appears in source, configuration examples, responses, telemetry, or unauthorized analytics; approved retention and deletion behavior is verified; dependency checks have no unresolved blocking finding; deployment defaults do not enable debug leakage or unsafe exposure; residual risks are documented and engineer-dispositioned.
 - **AI Output Summary:** Performed comprehensive security review across 6 categories: (1) Secrets/credentials — no hardcoded secrets in source or committed config; .gitignore excludes secrets files; docker-compose dev credentials accepted as LOW risk; (2) Sensitive data in logs/metrics — no IPs, user agents, URLs, tokens, or referrers in logs or metrics; metrics use fixed enum/allowlist tags; alert rules and click event schema verified by tests; (3) Dependencies — locked via gradle.lockfile; all dependencies well-known, reputable, and minimal; (4) Configuration — no debug mode; minimal actuator exposure (health, metrics, info); Hibernate DDL disabled; Flyway manages schema; minimal Docker image; (5) Data retention — 90-day retention enforced at query and deletion time; hourly cleanup with deletion-lag alert; (6) Error handling — all exceptions wrapped in safe ApiErrorResponse envelope; no stack traces, DB details, or secrets in client responses; tests verify this invariant.
 - **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
@@ -680,12 +686,15 @@ Copy this template for every new material AI activity.
 
 ---
 
-### PROMPT-NNN
+### PROMPT-030
 
+- **Prompt ID:** PROMPT-030
 - **Task ID:** TST-001
-- **Purpose:** Complete unit and property-test coverage to validate pure rules and invariants independently and reproducibly
 - **Date:** 2026-09-03
+- **Status:** APPROVED
+- **Purpose:** Complete unit and property-test coverage to validate pure rules and invariants independently and reproducibly
 - **Context Provided:** TST-001 in `TASKS.md`; full source tree; existing test suite (108 tests, 1 pre-existing failure)
+- **Constraints:** Execute only TST-001; add or update pure-behavior tests without changing unrelated runtime behavior; do not weaken existing tests; keep output deterministic and network-free.
 - **Acceptance Criteria:** Each approved pure-behavior requirement has direct test coverage; boundary and property tests cover documented invariants; tests are deterministic and independent of external network access; approved coverage goals are met or gaps are dispositioned.
 - **AI Output Summary:** Created 4 new test files: `LinkCreationControllerTest` (6 tests covering creation endpoint contract, null/invalid inputs, exception mapping), `ApiExceptionTest` (8 tests covering constructor validation, safe message enforcement, details handling), `ApiErrorResponseTest` (5 tests covering record validation, null details default, factory method, list copying), `RateLimitExceptionTest` (3 tests covering retryAfterSeconds normalization, large values). Created 2 property-style parameterized test classes: `property/PropertyStyleTests` (8 parameterized tests covering DestinationUrlValidator valid/invalid URLs, ShortCodeGenerator output invariants, collision retry boundaries), `observability/PropertyStyleTests` (6 parameterized tests covering Operation/Outcome tag generation, RequestMetricsFilter outcome/operation classification, RateLimiter.Bucket capacity/permit invariants). Added missing scenarios to 5 existing test files: `GlobalExceptionHandlerTest` (+2 tests for RateLimitException handling and ApiException with details), `LinkResolverTest` (+4 tests for null code, short code, long code, special chars), `RateLimitInterceptorTest` (+1 test for analytics over quota returning 429), `OperationalMetricsTest` (+2 tests for deletionLag negative duration clamping and saturation out-of-range clamping), `RequestMetricsFilterTest` (+2 tests for OTHER operation classification and filter metrics recording), `AnalyticsQueryServiceTest` (+3 tests for from-after-to, range exceeding 90 days, custom range within 90 days). Total: 229 tests (21 new), 1 pre-existing failure.
 - **Files Changed:** `src/test/java/com/example/urlshortener/web/LinkCreationControllerTest.java`, `src/test/java/com/example/urlshortener/web/error/ApiExceptionTest.java`, `src/test/java/com/example/urlshortener/web/error/ApiErrorResponseTest.java`, `src/test/java/com/example/urlshortener/web/error/RateLimitExceptionTest.java`, `src/test/java/com/example/urlshortener/property/PropertyStyleTests.java`, `src/test/java/com/example/urlshortener/observability/PropertyStyleTests.java`, `src/test/java/com/example/urlshortener/web/error/GlobalExceptionHandlerTest.java`, `src/test/java/com/example/urlshortener/redirect/LinkResolverTest.java`, `src/test/java/com/example/urlshortener/web/RateLimitInterceptorTest.java`, `src/test/java/com/example/urlshortener/observability/OperationalMetricsTest.java`, `src/test/java/com/example/urlshortener/observability/RequestMetricsFilterTest.java`, `src/test/java/com/example/urlshortener/analytics/AnalyticsQueryServiceTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
@@ -697,3 +706,26 @@ Copy this template for every new material AI activity.
 - **Validation:** `./gradlew clean test` passes with 229 tests completed, 1 pre-existing failure (`StructuredLoggingIntegrationTest`); all acceptance criteria met; no blocking findings.
 - **Test Results:** 229 tests completed, 1 pre-existing failure. 21 new tests pass across 4 new test files and 2 property-style test classes. Existing regression preserved across all updated test files.
 - **Engineer Approval:** APPROVED on 2026-09-03 by the engineer through the project conversation.
+
+---
+
+### PROMPT-031
+
+- **Prompt ID:** PROMPT-031
+- **Task ID:** TST-002
+- **Date:** 2026-09-03
+- **Status:** VALIDATED
+- **Purpose:** Complete API contract, datastore, analytics, and concurrency validation for the approved integration-test layer.
+- **Context Provided:** TST-002 in `TASKS.md`; approved contract, architecture, persistence, analytics, reliability, and traceability documents; existing integration-test scaffold; the local environment's lack of a runnable PostgreSQL server or usable Docker daemon.
+- **Constraints:** Execute only TST-002; add or update tests without broad refactors; keep validation factual; do not claim live PostgreSQL or Docker-backed execution when unavailable; preserve unrelated changes.
+- **Acceptance Criteria:** Every documented API outcome has an automated contract test; approved datastore and infrastructure integrations are exercised or explicitly dispositioned; concurrent creation cannot violate uniqueness or approved idempotency behavior; time boundaries, retention, and authorization are validated; tests pass from documented clean setup commands.
+- **AI Output Summary:** Extended `ApiContractIntegrationTest` with contract coverage for unknown fields, invalid JSON, unsupported media type, malformed redirect codes, redirect method handling, duplicate destination submissions, and analytics range validation; strengthened `ConcurrencyIntegrationTest` with repository cleanup and persistence assertions; kept migration and repository integration checks aligned with the contract. Adjusted `LinkCreationController` and `GlobalExceptionHandler` so the observed API behavior matches the approved error envelope and method contract. Recorded the H2-backed integration limitation in traceability because live PostgreSQL and Docker were unavailable in this environment.
+- **Files Changed:** `src/main/java/com/example/urlshortener/web/LinkCreationController.java`, `src/main/java/com/example/urlshortener/web/RedirectController.java`, `src/main/java/com/example/urlshortener/web/error/GlobalExceptionHandler.java`, `src/main/resources/application.properties`, `src/test/java/com/example/urlshortener/integration/ApiContractIntegrationTest.java`, `src/test/java/com/example/urlshortener/integration/ConcurrencyIntegrationTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Pending final engineer review; validation completed against the available H2-backed harness rather than live PostgreSQL.
+- **Accepted Output:** Integration contract coverage, concurrency cleanup/assertions, API error handling fixes, traceability updates, and H2-backed validation evidence.
+- **Edited Output:** None — all edits in this task were made directly by the AI agent.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `./gradlew test --no-daemon --tests com.example.urlshortener.integration.ApiContractIntegrationTest` passed; `./gradlew test --no-daemon --tests com.example.urlshortener.integration.ConcurrencyIntegrationTest` passed; `./gradlew test --no-daemon` passed with 275 tests completed and 0 failures; `git diff --check` passed.
+- **Test Results:** 275 tests completed, 0 failures. The validation suite passed end to end on the H2-backed integration harness. No live PostgreSQL server or usable Docker daemon was available, so live PostgreSQL validation remains an open limitation.
+- **Engineer Approval:** PENDING
