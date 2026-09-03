@@ -20,6 +20,10 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
                         + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
         })
 @ExtendWith(OutputCaptureExtension.class)
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class StructuredLoggingIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredLoggingIntegrationTest.class);

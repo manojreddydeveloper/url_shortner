@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/links")
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class AnalyticsController {
     private final AnalyticsQueryService service;
     private final OperationalMetrics metrics;

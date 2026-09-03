@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class AnalyticsCapture {
     private static final Logger LOGGER = LoggerFactory.getLogger(AnalyticsCapture.class);
 

@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class LinkEntityTest {
     @Test
     void exposesOnlyApprovedMappingFields() {

@@ -7,6 +7,10 @@ import org.springframework.http.HttpStatus;
 
 import com.example.urlshortener.web.error.ApiErrorResponse.ErrorDetail;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public final class ApiException extends RuntimeException {
 
     private final HttpStatus status;

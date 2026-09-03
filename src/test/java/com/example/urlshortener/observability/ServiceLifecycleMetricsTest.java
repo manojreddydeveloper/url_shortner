@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ServiceLifecycleMetricsTest {
     @Test
     void shutdownTransitionClearsReadinessAndSetsShutdown() {

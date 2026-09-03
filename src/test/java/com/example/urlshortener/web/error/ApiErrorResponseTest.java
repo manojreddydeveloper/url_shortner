@@ -8,6 +8,10 @@ import com.example.urlshortener.web.error.ApiErrorResponse.ErrorDetail;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ApiErrorResponseTest {
 
     @Test

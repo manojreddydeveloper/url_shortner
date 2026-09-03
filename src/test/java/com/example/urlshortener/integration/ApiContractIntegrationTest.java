@@ -10,6 +10,10 @@ import org.springframework.http.*;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ApiContractIntegrationTest extends AbstractIntegrationTest {
 
     private RestTemplate restTemplate;

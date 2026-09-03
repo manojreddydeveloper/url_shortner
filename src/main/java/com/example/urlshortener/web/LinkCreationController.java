@@ -11,6 +11,10 @@ import tools.jackson.databind.JsonNode;
 
 @RestController
 @RequestMapping("/api/v1/links")
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class LinkCreationController {
     private final LinkCreationService service;
     private final UrlShortenerProperties properties;

@@ -14,6 +14,10 @@ import com.example.urlshortener.observability.OperationalMetrics;
 import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 
 @Component
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class AnalyticsRetention {
     static final Duration RETENTION = Duration.ofDays(90);
 

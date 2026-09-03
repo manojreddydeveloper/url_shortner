@@ -4,6 +4,10 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("url-shortener.rate-limit")
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public record RateLimitProperties(
         Set<String> trustedProxyAddresses,
         int creationCapacity,

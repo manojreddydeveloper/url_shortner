@@ -2,6 +2,10 @@ package com.example.urlshortener.web.error;
 
 import java.util.List;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public record ApiErrorResponse(ErrorBody error) {
 
     public ApiErrorResponse {

@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "links", uniqueConstraints = @UniqueConstraint(name = "uk_links_short_code", columnNames = "short_code"))
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class LinkEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

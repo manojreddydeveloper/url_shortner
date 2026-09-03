@@ -8,6 +8,10 @@ import com.example.urlshortener.web.error.ApiException;
 import com.example.urlshortener.analytics.AnalyticsCapture;
 
 @RestController
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class RedirectController {
     private final LinkResolver resolver;
     private final AnalyticsCapture analytics;

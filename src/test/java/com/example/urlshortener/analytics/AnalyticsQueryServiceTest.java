@@ -25,6 +25,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class AnalyticsQueryServiceTest {
     private static final Instant NOW = Instant.parse("2026-09-02T12:00:00Z");
     private static final Instant DEFAULT_FROM = Instant.parse("2026-08-03T12:00:00Z");

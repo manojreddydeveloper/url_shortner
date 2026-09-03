@@ -10,6 +10,10 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class DatabaseReadinessTest {
     @Test
     void reportsUnreadyWhenTheDatabaseIsNotConfigured() {

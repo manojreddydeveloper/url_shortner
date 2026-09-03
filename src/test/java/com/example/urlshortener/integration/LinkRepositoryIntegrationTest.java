@@ -13,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import com.example.urlshortener.analytics.ClickEventRepository;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class LinkRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired

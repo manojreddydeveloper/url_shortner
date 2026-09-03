@@ -15,6 +15,10 @@ import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class LinkCreationService {
     private final DestinationUrlValidator validator;
     private final ShortCodeGenerator codeGenerator;

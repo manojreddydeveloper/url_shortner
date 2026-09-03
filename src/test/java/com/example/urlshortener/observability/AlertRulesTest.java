@@ -10,6 +10,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class AlertRulesTest {
     private static final Path RULES = Path.of("ops/alerts.yaml");
 

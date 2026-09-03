@@ -8,6 +8,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class DatabaseTimeBudgetTest {
     @Test
     void appliesApprovedPostgresStatementBudgets() {

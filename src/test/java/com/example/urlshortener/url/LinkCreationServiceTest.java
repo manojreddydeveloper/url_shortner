@@ -14,6 +14,10 @@ import com.example.urlshortener.persistence.LinkRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DataAccessResourceFailureException;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class LinkCreationServiceTest {
     @Test void createsDurableMappingAndReturnsToken() {
         LinkRepository repo = mock(LinkRepository.class); ShortCodeGenerator gen = mock(ShortCodeGenerator.class);

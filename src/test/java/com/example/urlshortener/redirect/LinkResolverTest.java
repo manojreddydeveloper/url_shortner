@@ -8,6 +8,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class LinkResolverTest {
     @Test void resolvesActiveMapping() {
         LinkRepository repo = mock(LinkRepository.class);
