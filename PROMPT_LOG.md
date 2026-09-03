@@ -637,3 +637,23 @@ Copy this template for every new material AI activity.
 - **Validation:** `git diff --check` passed; all 87 existing tests pass with 0 failures; threat model consistency review completed.
 - **Test Results:** All 87 tests pass, 0 failures. Existing regression evidence preserved.
 - **Engineer Approval:** APPROVED on 2026-09-03 by the engineer through the project conversation.
+
+---
+
+### PROMPT-NNN
+
+- **Task ID:** SEC-IMPL-002
+- **Purpose:** Implement approved identity, authorization, rate-limit, and abuse policies for creation and analytics endpoints
+- **Date:** 2026-09-03
+- **Context Provided:** SEC-IMPL-002 in `TASKS.md`; approved RDR-001 through RDR-004; accepted SEC-IMPL-001 threat model; existing `RateLimiter.java` skeleton, `OperationalMetrics` with rate-limit emitter, `GlobalExceptionHandler`, and `RequestCorrelationFilter`
+- **Acceptance Criteria:** Every protected operation enforces the approved identity and authorization policy; cross-owner or cross-tenant access is denied if ownership exists; rate-limit boundaries and recovery match approved policy; rejections use the approved response and retry metadata; rate-limit state and telemetry have approved bounds.
+- **AI Output Summary:** Created `RateLimiter` with trusted-proxy identity derivation from direct peer or X-Forwarded-For/X-Real-IP headers, in-memory token buckets (creation: 20 cap/10 per minute; analytics: 60 cap/60 per minute), 15-minute idle expiry; created `RateLimitInterceptor` wiring rate limiter into Spring MVC for POST /api/v1/links and GET /api/v1/links/*/analytics; created `RateLimitConfiguration` WebMvcConfigurer; created `RateLimitProperties` for trusted-proxy and rate-limit configuration; added 429 RATE_LIMITED handler in `GlobalExceptionHandler` with Retry-After header; wrote `RateLimiterTest` (9 tests covering quota enforcement, bucket separation, trusted-proxy identity derivation, idle purge), `RateLimitInterceptorTest` (6 tests covering 429 contract, Retry-After header, metric emission), and `RateLimitPropertiesTest` (3 tests covering defaults and valid values); verified end-to-end in Docker with 201 for allowed and 429 RATE_LIMITED with Retry-After for exceeded quota.
+- **Files Changed:** `src/main/java/com/example/urlshortener/observability/RateLimiter.java`, `src/main/java/com/example/urlshortener/web/RateLimitInterceptor.java`, `src/main/java/com/example/urlshortener/config/RateLimitConfiguration.java`, `src/main/java/com/example/urlshortener/config/RateLimitProperties.java`, `src/main/java/com/example/urlshortener/web/error/RateLimitException.java`, `src/main/java/com/example/urlshortener/web/error/GlobalExceptionHandler.java`, `src/test/java/com/example/urlshortener/observability/RateLimiterTest.java`, `src/test/java/com/example/urlshortener/web/RateLimitInterceptorTest.java`, `src/test/java/com/example/urlshortener/config/RateLimitPropertiesTest.java`, `TRACEABILITY.md`
+- **Engineer Review:** Standing engineer approval for SEC-IMPL-002 was granted on 2026-09-03; all 108 tests pass (1 pre-existing failure in `StructuredLoggingIntegrationTest`); Docker integration validated 429 RATE_LIMITED response with Retry-After header.
+- **Accepted Output:** `RateLimiter` with trusted-proxy identity derivation and token buckets, `RateLimitInterceptor` with 429 response, `RateLimitConfiguration` WebMvcConfigurer, `RateLimitProperties` configuration, `GlobalExceptionHandler` 429 handler, `RateLimitException`, all test classes, TRACEABILITY.md updates for SEC-IMPL-002, FR-009, SEC-005, SEC-009, SEC-011, PERF-006, OBS-003.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `./gradlew clean test` passes with 108 tests completed, 1 pre-existing failure (`StructuredLoggingIntegrationTest`); Docker integration validated POST /api/v1/links returns 201 for allowed requests and 429 RATE_LIMITED with Retry-After header for exceeded quota; GET /{code} redirect and /health/live endpoints unaffected by rate limiting.
+- **Test Results:** 108 tests completed, 1 pre-existing failure. 9 new tests pass (RateLimiterTest: 9, RateLimitInterceptorTest: 6, RateLimitPropertiesTest: 3). Existing regression preserved.
+- **Engineer Approval:** APPROVED on 2026-09-03 by the engineer through the project conversation.

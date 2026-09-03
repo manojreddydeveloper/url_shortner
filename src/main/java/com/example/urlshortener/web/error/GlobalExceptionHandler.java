@@ -29,6 +29,22 @@ public final class GlobalExceptionHandler {
         return ResponseEntity.status(exception.status()).body(response);
     }
 
+    @ExceptionHandler(RateLimitException.class)
+    org.springframework.http.ResponseEntity<ApiErrorResponse> handleRateLimitException(
+            RateLimitException exception,
+            jakarta.servlet.http.HttpServletResponse httpResponse) {
+        httpResponse.setHeader(
+                org.springframework.http.HttpHeaders.RETRY_AFTER,
+                String.valueOf(exception.retryAfterSeconds()));
+        ApiErrorResponse response = ApiErrorResponse.of(
+                "RATE_LIMITED",
+                "Rate limit exceeded. Please retry after "
+                        + exception.retryAfterSeconds() + " seconds.",
+                "unavailable",
+                null);
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> handleUnexpectedException(
             Exception exception,
