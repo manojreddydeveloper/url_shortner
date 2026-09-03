@@ -14,6 +14,10 @@ import java.time.Duration;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class LinkResolver {
     private static final Pattern CODE = Pattern.compile("[0-9A-Za-z]{10}");
     private final LinkRepository repository;

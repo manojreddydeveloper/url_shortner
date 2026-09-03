@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/health")
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class HealthController {
     private static final HealthResponse UP = new HealthResponse("UP");
     private static final HealthResponse DOWN = new HealthResponse("DOWN");

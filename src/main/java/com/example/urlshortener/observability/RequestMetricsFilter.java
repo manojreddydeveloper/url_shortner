@@ -14,6 +14,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class RequestMetricsFilter extends OncePerRequestFilter {
     private final OperationalMetrics metrics;
 

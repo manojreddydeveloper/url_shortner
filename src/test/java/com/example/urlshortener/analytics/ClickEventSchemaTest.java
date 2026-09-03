@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ClickEventSchemaTest {
     @Test
     void migrationContainsOnlyApprovedAnalyticsData() throws IOException {

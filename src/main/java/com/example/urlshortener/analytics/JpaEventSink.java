@@ -12,6 +12,10 @@ import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import java.time.Duration;
 
 @Component
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class JpaEventSink implements AnalyticsCapture.EventSink {
     private final Supplier<ClickEventRepository> repository;
     private final Supplier<DatabaseTimeBudget> timeBudget;

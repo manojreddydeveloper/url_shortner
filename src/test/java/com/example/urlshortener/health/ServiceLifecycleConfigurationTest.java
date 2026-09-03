@@ -7,6 +7,10 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ServiceLifecycleConfigurationTest {
     @Test
     void configuresGracefulShutdownWithTheApprovedHardLimit() throws IOException {

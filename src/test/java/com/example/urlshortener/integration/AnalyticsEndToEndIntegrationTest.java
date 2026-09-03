@@ -17,6 +17,10 @@ import com.example.urlshortener.analytics.ClickEventRepository;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class AnalyticsEndToEndIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired

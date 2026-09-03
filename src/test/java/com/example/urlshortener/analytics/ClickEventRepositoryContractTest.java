@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ClickEventRepositoryContractTest {
     @Test
     void aggregateMethodsAreProvidedByTheCustomRepositoryContract() throws Exception {

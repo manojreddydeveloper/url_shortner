@@ -10,6 +10,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Component;
 
 @Component
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class DatabaseTimeBudget {
     private final Supplier<EntityManager> entityManager;
     private final boolean enabled;

@@ -1,5 +1,9 @@
 package com.example.urlshortener.web.error;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public final class RateLimitException extends RuntimeException {
 
     private final long retryAfterSeconds;

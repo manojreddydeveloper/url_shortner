@@ -8,6 +8,10 @@ import jakarta.persistence.*;
         @Index(name = "ix_click_events_link_time", columnList = "link_id, occurred_at"),
         @Index(name = "ix_click_events_occurred_at", columnList = "occurred_at")
 })
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class ClickEventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

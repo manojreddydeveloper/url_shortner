@@ -14,6 +14,10 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import com.example.urlshortener.web.RequestCorrelationFilter;
 
 @RestControllerAdvice
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public final class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);

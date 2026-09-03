@@ -14,6 +14,10 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.annotation.Scheduled;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class AnalyticsRetentionTest {
     private static final Instant NOW = Instant.parse("2026-09-02T12:00:00Z");
     private static final Instant RETENTION_CUTOFF = Instant.parse("2026-06-04T12:00:00Z");

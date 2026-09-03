@@ -18,6 +18,10 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
 @ExtendWith(OutputCaptureExtension.class)
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class AnalyticsCaptureTest {
     private static final Instant NOW = Instant.parse("2026-09-02T12:00:00Z");
 

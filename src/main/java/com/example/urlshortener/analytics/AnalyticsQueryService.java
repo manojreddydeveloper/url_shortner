@@ -23,6 +23,10 @@ import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class AnalyticsQueryService {
     private static final Pattern CODE = Pattern.compile("[0-9A-Za-z]{10}");
     private static final Duration DEFAULT_RANGE = Duration.ofDays(30);

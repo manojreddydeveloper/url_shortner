@@ -12,6 +12,10 @@ import java.util.Map;
 import org.springframework.stereotype.Repository;
 
 @Repository
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class ClickEventRepositoryImpl implements ClickEventRepositoryCustom {
 
     @PersistenceContext

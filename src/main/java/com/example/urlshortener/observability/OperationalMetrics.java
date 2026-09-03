@@ -13,6 +13,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Component;
 
 @Component
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class OperationalMetrics {
     private final MeterRegistry registry;
     private final AtomicInteger liveness = new AtomicInteger(1);

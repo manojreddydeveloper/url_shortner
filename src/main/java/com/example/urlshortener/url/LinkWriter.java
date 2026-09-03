@@ -14,6 +14,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class LinkWriter {
     private final LinkRepository repository;
     private final DatabaseTimeBudget timeBudget;

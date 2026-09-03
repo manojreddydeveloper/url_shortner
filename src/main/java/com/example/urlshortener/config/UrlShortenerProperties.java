@@ -5,6 +5,10 @@ import java.net.URI;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("url-shortener")
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public record UrlShortenerProperties(URI publicBaseUrl) {
 
     public UrlShortenerProperties {

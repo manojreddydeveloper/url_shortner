@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableJpaRepositories
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 public class UrlShortenerApplication {
 
     public static void main(String[] args) {

@@ -8,6 +8,10 @@ import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.redirect.LinkResolver;
 import com.example.urlshortener.analytics.AnalyticsCapture;
 
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class RedirectControllerTest {
     @Test void returnsTemporaryNoStoreRedirect() {
         LinkResolver resolver = mock(LinkResolver.class);

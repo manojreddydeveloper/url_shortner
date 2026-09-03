@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.urlshortener.web.RequestCorrelationFilter;
 
 @ExtendWith(OutputCaptureExtension.class)
+/*
+ * Author: Manoj reddy <amireddymanojreddy@gmail.com>
+ * Since: 2026-09-03
+ */
 class GlobalExceptionHandlerTest {
 
     private MockMvc mockMvc;
