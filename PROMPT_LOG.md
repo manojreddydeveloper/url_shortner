@@ -729,3 +729,24 @@ Copy this template for every new material AI activity.
 - **Validation:** `./gradlew test --no-daemon --tests com.example.urlshortener.integration.ApiContractIntegrationTest` passed; `./gradlew test --no-daemon --tests com.example.urlshortener.integration.ConcurrencyIntegrationTest` passed; `./gradlew test --no-daemon` passed with 275 tests completed and 0 failures; `git diff --check` passed.
 - **Test Results:** 275 tests completed, 0 failures. The validation suite passed end to end on the H2-backed integration harness. No live PostgreSQL server or usable Docker daemon was available, so live PostgreSQL validation remains an open limitation.
 - **Engineer Approval:** PENDING
+
+### PROMPT-032
+
+- **Prompt ID:** PROMPT-032
+- **Task ID:** TST-003
+- **Date:** 2026-09-03
+- **Status:** VALIDATED
+- **Purpose:** Complete failure-mode, recovery, security, and privacy validation for the approved fault/security task.
+- **Context Provided:** TST-003 in `TASKS.md`; approved requirements, architecture, API, security, performance, and traceability documents; current source tree; a running Docker Compose stack with `app` and `postgres`; the compose app image initially lagging the checked-out source and rebuilt from the current tree during validation.
+- **Constraints:** Execute only TST-003; do not change application behavior beyond rebuilding the compose image for validation parity; keep validation factual; do not silently widen the approved fault, recovery, or privacy scope; preserve unrelated work.
+- **Acceptance Criteria:** Database, analytics, cache, timeout, retry, shutdown, and recovery scenarios behave as approved; no false success, silent overwrite, false not-found, or unobserved loss outside tolerance occurs; security and privacy controls withstand approved abuse cases; each failure emits the expected safe response and operational evidence; residual limitations are documented and approved.
+- **AI Output Summary:** Ran the full Gradle suite and focused fault/security tests, then validated the live compose environment. Controlled Docker Compose outage tests confirmed readiness drops to `503` while PostgreSQL is stopped and returns to `200` after restart. Live smoke checks against the rebuilt app confirmed `200` on `/health/live` and `/health/ready`, `400` for malformed JSON, `201` for link creation, and `302` redirect behavior with `Location`.
+- **Files Changed:** `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING
+- **Accepted Output:** TST-003 validation evidence, traceability updates for TST-003, NFR-002, NFR-007, and validation-summary entries.
+- **Edited Output:** None — the validation and traceability updates were made directly by the AI agent.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `./gradlew test --no-daemon --tests com.example.urlshortener.observability.StructuredLoggingIntegrationTest --tests com.example.urlshortener.health.DatabaseReadinessTest --tests com.example.urlshortener.integration.AnalyticsEndToEndIntegrationTest --tests com.example.urlshortener.web.error.GlobalExceptionHandlerTest --tests com.example.urlshortener.observability.AlertRulesTest` passed; `./gradlew test --no-daemon` passed; `docker compose ps` showed `app` and `postgres` healthy; `docker compose up -d --build app` rebuilt the app image from the checked-out source; `docker compose stop postgres` followed by `docker compose exec app sh -lc 'sleep 2; wget -S -qO- http://localhost:8080/health/ready'` returned `503`; `docker compose start postgres` restored readiness to `200`; live smoke checks from inside the app container confirmed `200` on `/health/live`, `201` on creation, `400` on malformed JSON, and `302` redirect with `Location` (wget followed the redirect target and observed a downstream `404`).
+- **Test Results:** 275 tests completed, 0 failures. Focused Gradle tests passed. Compose-backed smoke checks passed after rebuilding the app image from the current source tree. Host-side localhost access was blocked by the sandbox, so all live endpoint checks were executed from inside the app container.
+- **Engineer Approval:** PENDING
