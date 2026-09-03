@@ -1,5 +1,8 @@
 # Requirements Traceability Matrix
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 This matrix maps the normalized requirements in `ENGINEERING_PLAN.md` to the work in `TASKS.md`. Planned and completed evidence are identified explicitly; approving requirement scope does not by itself verify implementation.
 
 All requirement statuses were initialized as **NOT STARTED**.

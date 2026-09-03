@@ -1,5 +1,8 @@
 # URL Shortener Engineering Tasks
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 This backlog is derived from `ENGINEERING_PLAN.md`. It describes future work but does not authorize application-code implementation or dependency installation.
 
 PostgreSQL is already the approved runtime datastore and is wired through Docker Compose in the repository. The architecture tasks below now cover the remaining runtime-adjacent choices, integration details, and any future dependency changes around that baseline.

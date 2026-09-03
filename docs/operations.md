@@ -1,5 +1,8 @@
 # Operations
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 ## Metrics
 
 The service exposes Micrometer measurements through the Spring Boot metrics endpoint at `/actuator/metrics`. Custom `url_shortener.*` meters use only fixed `operation`, `outcome`, `status_class`, `action`, `state`, and `pool` tags. HikariCP supplies its bounded connection-pool measurements. Short codes, URLs, tokens, IP addresses, user agents, referrers, correlation IDs, SQL, and dependency addresses are prohibited as metric tags.

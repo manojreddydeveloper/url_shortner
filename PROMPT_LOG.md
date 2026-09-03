@@ -1,5 +1,8 @@
 # AI Engineering Activity Log
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 This document records material AI-assisted engineering activity for the project. It provides traceability from a prompt and task to generated output, engineer review, edits, rejection or acceptance, validation, and final approval.
 
 > **AI-generated output is treated as untrusted until reviewed and validated by the engineer.**

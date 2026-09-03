@@ -1,5 +1,8 @@
 # Architecture Decision Log
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 ## Governance
 
 This log records architecture proposals and approved architecture decisions derived from `ENGINEERING_PLAN.md`, `TASKS.md`, and `TRACEABILITY.md`.
