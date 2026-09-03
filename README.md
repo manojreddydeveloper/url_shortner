@@ -1,5 +1,8 @@
 # URL Shortener
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 Production-oriented URL shortener prototype. The project is being implemented as a sequence of explicitly approved engineering tasks.
 
 ## Project overview

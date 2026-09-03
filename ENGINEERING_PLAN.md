@@ -1,5 +1,8 @@
 # Engineering Plan
 
+<!-- Author: Manoj reddy <amireddymanojreddy@gmail.com> -->
+<!-- Since: 2026-09-03 -->
+
 This document converts the approved requirements analysis into a normalized engineering plan. It does not approve unresolved product behavior, select an architecture, authorize dependencies, or authorize implementation. Any item marked `PENDING ENGINEER APPROVAL` remains undecided.
 
 ## 1. Problem Statement
