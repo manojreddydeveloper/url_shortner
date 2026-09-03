@@ -28,6 +28,12 @@ The value must be an absolute HTTP or HTTPS origin without credentials, a non-ro
 
 Application logs use structured JSON with service identity and operation, outcome, and correlation fields where applicable. `APP_VERSION` supplies the deployed service version and defaults to `development` locally. Requests accept a safe `X-Request-ID` containing 1–64 ASCII letters, digits, periods, underscores, or hyphens; otherwise the application generates a new identifier. The identifier is returned in the response and included in request-scoped logging context.
 
+## Service lifecycle
+
+`GET /health/live` reports process liveness without consulting PostgreSQL. `GET /health/ready` reports `200` only when PostgreSQL accepts a connection validation and otherwise reports `503`; both responses contain only a minimal status value. Deployments must use readiness, rather than liveness, for traffic admission.
+
+Shutdown is graceful: the embedded server stops accepting new requests and gives active requests up to 30 seconds to finish before termination. Analytics is attempted synchronously and has no queue or buffer to drain.
+
 ## Prerequisites
 
 - A Java 21 JDK available on `PATH`

@@ -303,6 +303,27 @@ Copy this template for every new material AI activity.
 - **Test Results:** Not applicable to this documentation-only disposition; the immediately preceding REL-IMPL-001 suite passed 70 tests.
 - **Engineer Approval:** APPROVED under standing authorization on 2026-09-02.
 
+### PROMPT-024
+
+- **Prompt ID:** PROMPT-024
+- **Task ID:** REL-IMPL-003
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Implement approved process liveness, PostgreSQL readiness, recovery, and graceful shutdown behavior.
+- **Context Provided:** REL-IMPL-003 in `TASKS.md`; accepted REL-IMPL-001; not-applicable REL-IMPL-002; approved ARC-005 lifecycle policy; health API contract; existing Spring Boot application and tests.
+- **Constraints:** Implement only lifecycle behavior; retain the approved 250 ms connection-acquisition bound; keep liveness dependency-independent and readiness PostgreSQL-required; cap graceful drain at 30 seconds; add no analytics queue, cache, recovery guarantee, dependency, or sensitive health detail.
+- **Acceptance Criteria:** Liveness and readiness have distinct approved meanings; traffic admission can remain closed while PostgreSQL is unhealthy; readiness recovers within 30 seconds; graceful shutdown stops new admission and waits no more than 30 seconds; no analytics buffer exists.
+- **AI Output Summary:** Added a stateless PostgreSQL connection-validation readiness probe, minimal live/ready handlers, graceful server shutdown configuration, and focused dependency-loss, immediate-recovery, disclosure, liveness-independence, shutdown-ceiling, and no-buffer tests.
+- **Files Changed:** `src/main/java/com/example/urlshortener/health/DatabaseReadiness.java`, `src/main/java/com/example/urlshortener/web/HealthController.java`, `src/main/resources/application.properties`, `src/test/java/com/example/urlshortener/health/DatabaseReadinessTest.java`, `src/test/java/com/example/urlshortener/health/ServiceLifecycleConfigurationTest.java`, `src/test/java/com/example/urlshortener/web/HealthControllerTest.java`, `README.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Covered by the engineer's standing authorization for subsequent task flows; final diff and validation evidence remain available for human inspection.
+- **Accepted Output:** Health endpoints, readiness recovery behavior, 30-second graceful lifecycle configuration, no-buffer boundary, tests, and documentation.
+- **Edited Output:** None.
+- **Rejected Output:** None.
+- **Rejection Reason:** Not applicable.
+- **Validation:** Focused lifecycle tests passed. After one integration-context failure exposed a missing-datasource construction assumption, readiness was changed to report down when no datasource bean exists and the full suite passed. `git diff --check` passed. Live orchestrator traffic admission and operating-system forced termination cannot be exercised in this repository-only environment; configuration and component conformance are covered.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds; JUnit XML reports 78 tests, 0 failures, 0 errors, and 0 skipped.
+- **Engineer Approval:** APPROVED under standing authorization on 2026-09-02.
+
 ### PROMPT-022
 
 - **Prompt ID:** PROMPT-022
