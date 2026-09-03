@@ -282,26 +282,47 @@ Copy this template for every new material AI activity.
 
 ### PROMPT-009
 
+### PROMPT-020
+
+- **Prompt ID:** PROMPT-020
+- **Task ID:** ANL-002
+- **Date:** 2026-09-02
+- **Status:** GENERATED
+- **Purpose:** Implement approved analytics persistence, aggregation primitives, fail-open delivery behavior, and 90-day retention cleanup.
+- **Context Provided:** ANL-002 in `TASKS.md`; accepted ANL-001 and ARC-004; approved analytics data, privacy, consistency, loss, no-retry/no-buffer, UTC aggregation, and deletion boundaries.
+- **Constraints:** Execute only ANL-002; persist only link ID, UTC event time, and coarse traffic class; use the existing PostgreSQL/JPA/Flyway stack; add no queue, retry, buffer, separate datastore, API, authorization, or new dependency; leave the hard append timeout to REL-IMPL-001.
+- **Acceptance Criteria:** Stored and aggregated data follows approved time/privacy boundaries; independent eligible requests remain independent events; append loss is observable and fail-open; physical cleanup is enforceable within 24 hours; no buffered lifecycle exists.
+- **AI Output Summary:** Added the click-event entity, repository, PostgreSQL aggregate queries, one-attempt JPA sink, V2 migration, hourly UTC retention cleanup, privacy-safe append/cleanup failure evidence, and focused mapping, query-contract, schema, duplicate, failure, and retention tests.
+- **Files Changed:** `src/main/java/com/example/urlshortener/analytics/AnalyticsCapture.java`, `AnalyticsRetention.java`, `AnalyticsSchedulingConfiguration.java`, `ClickEventEntity.java`, `ClickEventRepository.java`, `JpaEventSink.java`, `src/main/resources/db/migration/V2__create_click_events.sql`, analytics tests, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING — review PostgreSQL-native aggregate SQL, event schema, hourly deletion boundary, lazy repository behavior for non-JPA test contexts, privacy-safe failure logs, and the documented validation limitation.
+- **Accepted Output:** PENDING
+- **Edited Output:** PENDING
+- **Rejected Output:** PENDING
+- **Rejection Reason:** PENDING
+- **Validation:** Analytics-focused tests passed; the full Gradle test suite passed; `git diff --check` passed. Docker is installed but its daemon is unavailable, so the migration and native aggregate SQL were not executed against live PostgreSQL.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds with 4 actionable tasks. JUnit XML reports contain 55 tests, 0 failures, 0 errors, and 0 skipped tests.
+- **Engineer Approval:** PENDING
+
 ### PROMPT-019
 
 - **Prompt ID:** PROMPT-019
 - **Task ID:** ANL-001
 - **Date:** 2026-09-02
-- **Status:** GENERATED
+- **Status:** APPROVED
 - **Purpose:** Implement approved analytics click-event capture at the redirect boundary.
 - **Context Provided:** ANL-001 in `TASKS.md`; accepted ARC-004, RED-001, and RED-002; approved click, privacy, bot-classification, minimal-field, and fail-open semantics.
 - **Constraints:** Execute only ANL-001; capture only active GET redirects; persist no raw IP, user-agent, referrer, destination, token, or correlation ID; fail open on sink failure; do not implement analytics querying or durable event storage.
 - **Acceptance Criteria:** Exactly approved redirect outcomes attempt events; suspected bots are classified heuristically; event fields are minimized; capture cannot change redirect behavior.
 - **AI Output Summary:** Added `ClickEvent` and fail-open `AnalyticsCapture`, integrated capture before redirects, and added a no-op sink for the current foundation while storage remains ANL-002.
 - **Files Changed:** `src/main/java/com/example/urlshortener/analytics/ClickEvent.java`, `src/main/java/com/example/urlshortener/analytics/AnalyticsCapture.java`, `src/main/java/com/example/urlshortener/web/RedirectController.java`, `src/test/java/com/example/urlshortener/web/RedirectControllerTest.java`, `TRACEABILITY.md`, `PROMPT_LOG.md`
-- **Engineer Review:** PENDING — review event boundary, classifier heuristic, no-op sink, and privacy/failure behavior.
-- **Accepted Output:** PENDING
-- **Edited Output:** PENDING
-- **Rejected Output:** PENDING
-- **Rejection Reason:** PENDING
+- **Engineer Review:** The engineer reviewed the event boundary, classifier heuristic, no-op sink, privacy/failure behavior, and validation evidence and explicitly approved ANL-001 on 2026-09-02.
+- **Accepted Output:** Minimal click-event model, active-GET capture integration, heuristic bot classification, fail-open behavior, and focused tests.
+- **Edited Output:** None — the engineer approved the generated implementation without requesting edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
 - **Validation:** Initial test run exposed missing Spring constructor injection for `AnalyticsCapture`; added explicit injection. Final `git diff --check` passed.
 - **Test Results:** Final `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 12 seconds with 4 actionable tasks and no reported failures.
-- **Engineer Approval:** PENDING
+- **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
 
 ### PROMPT-018
 
