@@ -616,3 +616,24 @@ Copy this template for every new material AI activity.
 - **Validation:** `git diff --check` and documentation consistency review completed; no application source or dependency files changed.
 - **Test Results:** Existing automated tests were not rerun because ARC-004 changes documentation only; prior regression evidence remains recorded in PROMPT-008.
 - **Engineer Approval:** APPROVED on 2026-09-02 by the engineer through the project conversation.
+
+### PROMPT-027
+
+- **Prompt ID:** PROMPT-027
+- **Task ID:** SEC-IMPL-001
+- **Date:** 2026-09-03
+- **Status:** APPROVED
+- **Purpose:** Create threat model and harden exposed inputs and outputs per approved SEC requirements.
+- **Context Provided:** `ENGINEERING_PLAN.md`, `TASKS.md`, `DECISIONS.md`, `TRACEABILITY.md`, the repository state, and the engineer's explicit task authorization.
+- **Constraints:** Execute only SEC-IMPL-001; make documentation and control-verification changes only; do not implement application features, add dependencies, approve ADRs, silently extend the approved approach, or continue to another task; preserve unrelated staged changes.
+- **Acceptance Criteria:** Threat model covers creation, redirect, analytics, storage, telemetry, and operational interfaces; SEC-001 through SEC-004, SEC-008, SEC-010, and SEC-012 as applicable have verified controls; residual threats have an owner and disposition; no destination fetch exists unless SSRF controls were separately approved.
+- **AI Output Summary:** Updated `docs/security.md` with comprehensive threat model covering assets, actors, entry points, data flows, threats, verified controls, and residual risks; documented residual threats (bearer-token sharing, rate-limit reset on restart, pseudonymous identity scope, no exactly-once analytics); confirmed no-server-fetch baseline per SEC-012; 87 existing tests pass with 0 failures; all code controls (URL validator, short-code generator, error handler, properties) verified against approved security requirements.
+- **Files Changed:** `docs/security.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** The engineer reviewed the threat model documentation and validated control evidence on 2026-09-03.
+- **Accepted Output:** Threat model documentation in `docs/security.md`, verified controls for SEC-001 through SEC-004, SEC-008, SEC-010, SEC-012, residual threat dispositions with owners, no-fetch boundary confirmation.
+- **Edited Output:** None — the engineer approved the generated changes without requesting further edits.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` passed; all 87 existing tests pass with 0 failures; threat model consistency review completed.
+- **Test Results:** All 87 tests pass, 0 failures. Existing regression evidence preserved.
+- **Engineer Approval:** APPROVED on 2026-09-03 by the engineer through the project conversation.
