@@ -2,10 +2,10 @@
 
 ## Governance
 
-This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TASKS.md`, and `TRACEABILITY.md`.
+This log records architecture proposals and approved architecture decisions derived from `ENGINEERING_PLAN.md`, `TASKS.md`, and `TRACEABILITY.md`.
 
 - **No decision in this document is approved unless its status is `APPROVED` by the engineer.**
-- The current entries are `PROPOSED — PENDING ENGINEER APPROVAL`.
+- The current entries include approved architecture decisions and unresolved proposals.
 - AI proposes and analyzes alternatives. The engineer approves, modifies, defers, or rejects each decision.
 - A rejected alternative may be reconsidered if requirements, scale, evidence, or constraints change.
 - Approval of architecture does not automatically authorize source-code implementation or dependency installation.
@@ -78,20 +78,20 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the generated REQ-004 documentation changes on 2026-09-02.
 - **REL-IMPL-001 adjustment:** APPROVED on 2026-09-02 — use HikariCP's supported 250 ms minimum for connection acquisition instead of the earlier 100 ms target; all other approved dependency budgets remain unchanged.
 
-### ARC-001 — Propose system boundaries and technical stack
+### ARC-001 — Approve system boundaries and technical stack
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Task:** ARC-001
 - **Date:** 2026-09-02
 - **Requirements:** NFR-002, NFR-006, NFR-007, NFR-009, PERF-004, PERF-008, REL-001, REL-003, REL-004, SEC-005, SEC-008, SEC-013, OBS-001 through OBS-011
-- **Decision:** Use one Java/Spring Boot application built with Gradle, organized as a modular monolith with explicit HTTP, configuration, URL-policy, creation, code-generation, mapping-repository, resolver, redirect, analytics, access-control, rate-limit, lifecycle, and observability boundaries. Use Hibernate/JPA with one PostgreSQL datastore as the authoritative source for mappings and minimal analytics events. Validate the prototype as one application instance in one region. Do not add Redis, Kafka, a queue, microservices, a separate analytics service, a separate ID-generation service, or distributed locking in the baseline.
+- **Decision:** Use one Java/Spring Boot application built with Gradle, organized as a modular monolith with explicit HTTP, configuration, URL-policy, creation, code-generation, mapping-repository, resolver, redirect, analytics, access-control, rate-limit, lifecycle, and observability boundaries. Use Hibernate/JPA with one PostgreSQL datastore as the authoritative source for mappings and minimal analytics events. Docker Compose provides the local app-plus-database runtime for development and validation. Validate the prototype as one application instance in one region. Do not add Redis, Kafka, a queue, microservices, a separate analytics service, a separate ID-generation service, or distributed locking in the baseline.
 - **Alternatives evaluated:** A single unstructured application; microservices; SQLite or a document database; a separate analytics service; Kafka or an outbox; Redis cache/shared limiter; a separate ID service; and distributed locking. These alternatives add operational, network, coordination, or consistency cost without an approved requirement or measured failure of the baseline envelope.
-- **Dependency rationale:** Java, Gradle, Spring Boot, Hibernate/JPA, and PostgreSQL each have a direct role in the approved prototype. Redis, Kafka, queues, and additional services have no baseline role and remain conditional evolution options only.
+- **Dependency rationale:** Java, Gradle, Spring Boot, Hibernate/JPA, and PostgreSQL each have a direct role in the approved prototype. Docker Compose is the local runtime wrapper for the approved app-plus-database baseline. Redis, Kafka, queues, and additional services have no baseline role and remain conditional evolution options only.
 - **Trust and data boundary:** Clients and forwarding metadata are untrusted until validated; PostgreSQL is authoritative but failure must remain distinguishable from not-found; analytics and operational telemetry remain separate and privacy-safe; configured public base URL and explicitly trusted proxy addresses are the only trusted deployment inputs.
 - **Revisit triggers:** Add infrastructure or split a service only after measured failure against an approved target, a new deployment/ownership requirement, or a new engineer-approved durability, replay, global-rate-limit, or multi-region requirement.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-001 architecture proposal on 2026-09-02. This approval authorizes downstream architecture and foundation tasks to proceed within the documented boundaries; it does not approve unlisted dependencies or source changes.
 
-### ARC-002 — Propose the versioned API contract
+### ARC-002 — Approve the versioned API contract
 
 - **Status:** APPROVED
 - **Task:** ARC-002
@@ -103,7 +103,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Open wire details:** Exact JSON property naming, optional `Location` on creation, the `405` envelope/`Allow` header, `Retry-After` calculation, informational rate-limit headers, content-negotiation normalization, and environment-specific base URL/proxy values remain proposed in `docs/api.md` and require engineer review.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-002 API contract on 2026-09-02. The remaining wire details are accepted as documented proposals for implementation review; changes that materially alter the contract require a new decision.
 
-### ARC-003 — Propose mapping and lifecycle data model
+### ARC-003 — Approve mapping and lifecycle data model
 
 - **Status:** APPROVED
 - **Task:** ARC-003
@@ -116,7 +116,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Open model details:** Exact migration tool, PostgreSQL collation declaration, deletion policy if mappings later become mutable, and database-versus-application authoritative clock implementation remain implementation-level choices requiring review before persistence work.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-003 mapping and lifecycle data model on 2026-09-02. The documented implementation-level details remain subject to review within downstream persistence work.
 
-### ARC-004 — Define analytics data and processing architecture
+### ARC-004 — Approve analytics data and processing architecture
 
 - **Status:** APPROVED
 - **Task:** ARC-004
@@ -128,7 +128,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 - **Infrastructure decision:** Do not add Kafka, Redis, a queue, a second datastore, or a separate service for ARC-004. Reconsider only after measured redirect-overhead failure, a durability/replay requirement, independent consumers, or deployment ownership requires it and the engineer approves a new decision.
 - **Engineer disposition:** APPROVED — the engineer reviewed and approved the ARC-004 analytics data and processing architecture on 2026-09-02. The documented implementation-level details remain subject to review during analytics implementation.
 
-### ARC-005 — Define reliability and observability architecture
+### ARC-005 — Approve reliability and observability architecture
 
 - **Status:** APPROVED
 - **Task:** ARC-005
@@ -144,7 +144,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 | ID | Topic | Proposed outcome | Status |
 | --- | --- | --- | --- |
 | ADR-001 | Deployment architecture | Modular monolith, not microservices | PROPOSED |
-| ADR-002 | Authoritative datastore | PostgreSQL | PROPOSED |
+| ADR-002 | Authoritative datastore | PostgreSQL, with local Docker Compose runtime | APPROVED |
 | ADR-003 | Short-code generation | Ten-character random Base62 in application | PROPOSED |
 | ADR-004 | Coordination | Database uniqueness; no distributed lock or ID service | PROPOSED |
 | ADR-005 | Redirect semantics | `302 Found` with conservative client cache control | PROPOSED |
@@ -160,7 +160,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ## ADR-001 — Use a modular monolith
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Requirements:** NFR-002, NFR-006, NFR-007, PERF-004, PERF-008, REL-003
 - **Context:** The prototype needs creation, redirect, analytics, reliability, security, and observability behavior. There is no approved team-boundary, independent-deployment, or per-domain scaling requirement.
 - **Proposed decision:** Build one deployable application containing internal API, creation, resolution, analytics, access-control, rate-limit, and observability modules.
@@ -175,7 +175,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ## ADR-002 — Use PostgreSQL as the authoritative datastore
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Requirements:** FR-003, FR-010, REL-001, REL-002, REL-003, REL-009, PERF-005
 - **Context:** Mappings require durable writes, atomic uniqueness, case-sensitive lookup, concurrency correctness, expiration data, and analytics range queries.
 - **Proposed decision:** Use PostgreSQL for link mappings and minimal analytics events.
@@ -190,7 +190,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ## ADR-003 — Generate random Base62 short codes in the application
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Requirements:** FR-003, SEC-003, SEC-004, REL-002, PERF-004
 - **Context:** Codes should be compact, URL-safe, non-sequential, and independently generatable by application instances.
 - **Proposed decision:** Generate ten case-sensitive Base62 characters from a cryptographically secure source. Insert directly and retry the specific unique-code conflict up to five times. The database remains the uniqueness authority.
@@ -206,7 +206,7 @@ This log records architecture proposals derived from `ENGINEERING_PLAN.md`, `TAS
 
 ## ADR-004 — Use datastore constraints instead of an ID service or distributed locking
 
-- **Status:** PROPOSED — PENDING ENGINEER APPROVAL
+- **Status:** APPROVED
 - **Requirements:** FR-003, FR-010, SEC-004, REL-002, REL-009
 - **Context:** Concurrent application instances can generate the same candidate code. The system needs correctness but does not require coordinated sequential identifiers.
 - **Proposed decision:** Let each application instance generate candidates. Use PostgreSQL's unique constraint as the atomic arbiter. Do not use distributed locks and do not deploy a separate ID-generation service.

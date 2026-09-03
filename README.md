@@ -24,6 +24,7 @@ FND-001 provides the buildable project foundation:
 - Spring Web
 - Spring Data JPA with Boot-managed Hibernate
 - PostgreSQL JDBC driver at runtime
+- PostgreSQL runtime datastore, exercised locally through Docker Compose
 - Spring Boot test support
 
 FND-002 adds foundational configuration validation, safe API error envelopes, request correlation, and structured JSON logging. No URL creation, redirect, persistence mapping, analytics, rate limiting, or other product behavior is implemented yet.
@@ -82,7 +83,13 @@ export APP_VERSION=development
 ./gradlew bootRun
 ```
 
-The runtime database configuration is intentionally not documented here yet because it belongs to later approved work.
+The approved local runtime uses PostgreSQL through Docker Compose. Start the application and database together with:
+
+```shell
+docker compose up --build
+```
+
+The Compose file provides the runtime database connection settings for the `app` service. If you run the application outside Docker Compose, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` for a PostgreSQL instance that matches the approved runtime contract.
 
 ## Prerequisites
 
@@ -113,7 +120,7 @@ Run the minimal automated test independently:
 ./gradlew test
 ```
 
-The application is packaged by the build. Runtime database configuration belongs to a later approved task and is intentionally not defined yet.
+The application is packaged by the build. Runtime database configuration is defined for the approved PostgreSQL baseline and is provided locally through Docker Compose.
 
 ## Current implementation status
 
@@ -143,8 +150,8 @@ See [TRACEABILITY.md](TRACEABILITY.md) for the detailed status of each requireme
 
 | File | What it contains | When to read it |
 | --- | --- | --- |
-| [docs/architecture.md](docs/architecture.md) | The proposed system architecture, component boundaries, request flow, data flow, and database design. | Before reviewing service boundaries, flows, or persistence design. |
-| [docs/api.md](docs/api.md) | The proposed HTTP API contract, request and response shapes, status codes, and example payloads. | Before implementing or testing HTTP endpoints. |
+| [docs/architecture.md](docs/architecture.md) | The approved system architecture baseline, component boundaries, request flow, data flow, and database design. | Before reviewing service boundaries, flows, or persistence design. |
+| [docs/api.md](docs/api.md) | The approved HTTP API contract, request and response shapes, status codes, and example payloads. | Before implementing or testing HTTP endpoints. |
 | [docs/security.md](docs/security.md) | The threat model, hardened input/output boundaries, and verified security controls. | Before reviewing risks, input validation, or exposed data. |
 | [docs/operations.md](docs/operations.md) | Operational metrics, alerts, and operational gaps that still require deployment-owner decisions. | Before wiring metrics, alerts, or operational runbooks. |
 | [docs/performance.md](docs/performance.md) | The reliability and performance budget, including approved dependency timing bounds and the no-cache baseline. | Before changing timeout, caching, or throughput-sensitive behavior. |
