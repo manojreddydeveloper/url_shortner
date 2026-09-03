@@ -13,7 +13,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -24,7 +23,6 @@ import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
-@ConditionalOnBean({LinkRepository.class, ClickEventRepository.class})
 public class AnalyticsQueryService {
     private static final Pattern CODE = Pattern.compile("[0-9A-Za-z]{10}");
     private static final Duration DEFAULT_RANGE = Duration.ofDays(30);

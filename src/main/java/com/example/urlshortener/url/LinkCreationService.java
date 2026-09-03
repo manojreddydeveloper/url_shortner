@@ -8,7 +8,6 @@ import java.util.Base64;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 import com.example.urlshortener.observability.OperationalMetrics;
@@ -16,7 +15,6 @@ import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
-@ConditionalOnBean(LinkRepository.class)
 public class LinkCreationService {
     private final DestinationUrlValidator validator;
     private final ShortCodeGenerator codeGenerator;

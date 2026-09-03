@@ -5,7 +5,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
 import com.example.urlshortener.persistence.DatabaseTimeBudget;
@@ -15,7 +14,6 @@ import java.time.Duration;
 import org.springframework.beans.factory.ObjectProvider;
 
 @Service
-@ConditionalOnBean(LinkRepository.class)
 public class LinkResolver {
     private static final Pattern CODE = Pattern.compile("[0-9A-Za-z]{10}");
     private final LinkRepository repository;

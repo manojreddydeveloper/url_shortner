@@ -1,14 +1,11 @@
 package com.example.urlshortener.web;
 
 import com.example.urlshortener.analytics.AnalyticsQueryService;
-import com.example.urlshortener.analytics.ClickEventRepository;
-import com.example.urlshortener.persistence.LinkRepository;
 import com.example.urlshortener.observability.OperationalMetrics;
 import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import com.example.urlshortener.web.error.ApiException;
 import java.time.Instant;
 import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +14,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ConditionalOnBean({LinkRepository.class, ClickEventRepository.class})
 @RequestMapping("/api/v1/links")
 public class AnalyticsController {
     private final AnalyticsQueryService service;

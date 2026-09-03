@@ -3,7 +3,6 @@ package com.example.urlshortener.url;
 import com.example.urlshortener.persistence.DatabaseTimeBudget;
 import com.example.urlshortener.persistence.LinkEntity;
 import com.example.urlshortener.persistence.LinkRepository;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Component
-@ConditionalOnBean(LinkRepository.class)
 public class LinkWriter {
     private final LinkRepository repository;
     private final DatabaseTimeBudget timeBudget;

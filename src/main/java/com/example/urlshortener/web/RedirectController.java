@@ -1,16 +1,13 @@
 package com.example.urlshortener.web;
 
 import java.net.URI;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import com.example.urlshortener.redirect.LinkResolver;
-import com.example.urlshortener.persistence.LinkRepository;
 import com.example.urlshortener.web.error.ApiException;
 import com.example.urlshortener.analytics.AnalyticsCapture;
 
 @RestController
-@ConditionalOnBean(LinkRepository.class)
 public class RedirectController {
     private final LinkResolver resolver;
     private final AnalyticsCapture analytics;

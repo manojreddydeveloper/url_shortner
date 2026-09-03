@@ -7,11 +7,8 @@ import com.example.urlshortener.config.UrlShortenerProperties;
 import com.example.urlshortener.url.LinkCreationService;
 import com.example.urlshortener.web.error.ApiException;
 import org.springframework.http.HttpStatus;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import com.example.urlshortener.persistence.LinkRepository;
 
 @RestController
-@ConditionalOnBean(LinkRepository.class)
 @RequestMapping("/api/v1/links")
 public class LinkCreationController {
     private final LinkCreationService service;
