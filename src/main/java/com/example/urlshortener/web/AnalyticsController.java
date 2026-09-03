@@ -3,6 +3,8 @@ package com.example.urlshortener.web;
 import com.example.urlshortener.analytics.AnalyticsQueryService;
 import com.example.urlshortener.analytics.ClickEventRepository;
 import com.example.urlshortener.persistence.LinkRepository;
+import com.example.urlshortener.observability.OperationalMetrics;
+import com.example.urlshortener.observability.OperationalMetrics.Outcome;
 import com.example.urlshortener.web.error.ApiException;
 import java.time.Instant;
 import java.util.List;
@@ -16,14 +18,25 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @ConditionalOnBean({LinkRepository.class, ClickEventRepository.class})
 @RequestMapping("/api/v1/links")
 public class AnalyticsController {
     private final AnalyticsQueryService service;
+    private final OperationalMetrics metrics;
 
-    public AnalyticsController(AnalyticsQueryService service) { this.service = service; }
+    @Autowired
+    public AnalyticsController(AnalyticsQueryService service, ObjectProvider<OperationalMetrics> metrics) {
+        this(service, metrics.getIfAvailable());
+    }
+
+    public AnalyticsController(AnalyticsQueryService service) { this(service, (OperationalMetrics) null); }
+    private AnalyticsController(AnalyticsQueryService service, OperationalMetrics metrics) {
+        this.service = service; this.metrics = metrics;
+    }
 
     @GetMapping(value = "/{code}/analytics", produces = "application/json")
     public ResponseEntity<Response> analytics(
@@ -35,29 +48,36 @@ public class AnalyticsController {
         try {
             AnalyticsQueryService.Result result = service.query(
                     code, bearerToken(authorization), from, to, bucket);
+            metric(Outcome.SUCCESS);
             return ResponseEntity.ok(Response.from(result));
         } catch (AnalyticsQueryService.AuthenticationRequiredException exception) {
+            metric(Outcome.AUTHENTICATION_REQUIRED);
             throw new ApiException(
                     HttpStatus.UNAUTHORIZED,
                     "AUTHENTICATION_REQUIRED",
                     "An analytics token is required.");
         } catch (AnalyticsQueryService.ValidationException exception) {
+            metric(Outcome.VALIDATION_REJECTION);
             throw new ApiException(
                     HttpStatus.BAD_REQUEST,
                     "VALIDATION_ERROR",
                     "The request contains invalid fields.");
         } catch (AnalyticsQueryService.NotFoundException exception) {
+            metric(Outcome.UNKNOWN);
             throw new ApiException(
                     HttpStatus.NOT_FOUND,
                     "NOT_FOUND",
                     "The requested link was not found.");
         } catch (AnalyticsQueryService.QueryUnavailableException exception) {
+            metric(Outcome.DEPENDENCY_FAILURE);
             throw new ApiException(
                     HttpStatus.SERVICE_UNAVAILABLE,
                     "DEPENDENCY_UNAVAILABLE",
                     "Analytics is temporarily unavailable.");
         }
     }
+
+    private void metric(Outcome outcome) { if (metrics != null) metrics.analytics("query", outcome); }
 
     private static String bearerToken(String authorization) {
         if (authorization == null

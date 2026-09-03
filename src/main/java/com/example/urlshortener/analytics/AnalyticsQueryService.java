@@ -18,6 +18,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.urlshortener.observability.OperationalMetrics;
+import com.example.urlshortener.observability.OperationalMetrics.Operation;
+import com.example.urlshortener.observability.OperationalMetrics.Outcome;
+import org.springframework.beans.factory.ObjectProvider;
 
 @Service
 @ConditionalOnBean({LinkRepository.class, ClickEventRepository.class})
@@ -31,21 +35,29 @@ public class AnalyticsQueryService {
     private final ClickEventRepository events;
     private final Clock clock;
     private final DatabaseTimeBudget timeBudget;
+    private final OperationalMetrics metrics;
 
     @Autowired
-    public AnalyticsQueryService(LinkRepository links, ClickEventRepository events, DatabaseTimeBudget timeBudget) {
-        this(links, events, Clock.systemUTC(), timeBudget);
+    public AnalyticsQueryService(LinkRepository links, ClickEventRepository events, DatabaseTimeBudget timeBudget,
+            ObjectProvider<OperationalMetrics> metrics) {
+        this(links, events, Clock.systemUTC(), timeBudget, metrics.getIfAvailable());
     }
 
     AnalyticsQueryService(LinkRepository links, ClickEventRepository events, Clock clock) {
-        this(links, events, clock, null);
+        this(links, events, clock, null, null);
     }
 
     AnalyticsQueryService(LinkRepository links, ClickEventRepository events, Clock clock, DatabaseTimeBudget timeBudget) {
+        this(links, events, clock, timeBudget, null);
+    }
+
+    private AnalyticsQueryService(LinkRepository links, ClickEventRepository events, Clock clock,
+            DatabaseTimeBudget timeBudget, OperationalMetrics metrics) {
         this.links = links;
         this.events = events;
         this.clock = clock;
         this.timeBudget = timeBudget;
+        this.metrics = metrics;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -60,13 +72,17 @@ public class AnalyticsQueryService {
         validateRange(from, to);
 
         TokenDigest candidate = tokenDigest(token);
+        long started = System.nanoTime();
         try {
             if (timeBudget != null) timeBudget.apply(DatabaseTimeBudget.Operation.ANALYTICS_QUERY);
             LinkEntity link = links.findByShortCode(code).orElse(null);
             byte[] expectedHash = link == null ? UNKNOWN_TOKEN_HASH : link.getAnalyticsTokenHash();
             boolean tokenMatches = expectedHash != null
                     && MessageDigest.isEqual(expectedHash, candidate.hash());
-            if (link == null || !candidate.valid() || !tokenMatches) throw new NotFoundException();
+            if (link == null || !candidate.valid() || !tokenMatches) {
+                dependency(Outcome.SUCCESS, started);
+                throw new NotFoundException();
+            }
 
             Instant retentionCutoff = asOf.minus(MAXIMUM_RANGE);
             ClickEventRepository.TrafficTotals totals = events.aggregateTotals(
@@ -79,7 +95,7 @@ public class AnalyticsQueryService {
                             value.getSuspectedAutomated(),
                             value.getUnclassified()))
                     .toList();
-            return new Result(
+            Result result = new Result(
                     code,
                     from,
                     to,
@@ -89,9 +105,17 @@ public class AnalyticsQueryService {
                             totals.getUnclassified()),
                     buckets,
                     asOf);
+            dependency(Outcome.SUCCESS, started);
+            return result;
         } catch (DataAccessException exception) {
+            dependency(Outcome.DEPENDENCY_FAILURE, started);
             throw new QueryUnavailableException();
         }
+    }
+
+    private void dependency(Outcome outcome, long started) {
+        if (metrics != null) metrics.dependency(Operation.ANALYTICS, outcome,
+                Duration.ofNanos(System.nanoTime() - started));
     }
 
     private static Instant parseOrDefault(String value, Instant defaultValue) {

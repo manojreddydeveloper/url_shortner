@@ -324,6 +324,27 @@ Copy this template for every new material AI activity.
 - **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 11 seconds; JUnit XML reports 78 tests, 0 failures, 0 errors, and 0 skipped.
 - **Engineer Approval:** APPROVED under standing authorization on 2026-09-02.
 
+### PROMPT-025
+
+- **Prompt ID:** PROMPT-025
+- **Task ID:** OBS-IMPL-001
+- **Date:** 2026-09-02
+- **Status:** APPROVED
+- **Purpose:** Implement bounded operational metrics and synthetically validated alert definitions.
+- **Context Provided:** OBS-IMPL-001; approved RDR-004 thresholds and ARC-005 observability boundaries; accepted creation, redirect, analytics, dependency, and lifecycle components; current dependency lock.
+- **Constraints:** Use only fixed normalized labels; prohibit content and identifiers in tags; preserve application behavior when observability fails; avoid selecting an external exporter, dashboard, alert router, or owner; document unresolved deployment gaps without silently deciding them.
+- **Acceptance Criteria:** Normalized request count/error/latency and required domain/dependency/lifecycle outcome metrics are emitted; labels are bounded and privacy-safe; alert thresholds/windows match RDR-004 and pass threshold/duration/firing/recovery tests; operational gaps are factual.
+- **AI Output Summary:** Added the framework-native Actuator/Micrometer registry and endpoint; fixed-enum request/domain/dependency/lifecycle/rate-limit/saturation/retention instrumentation; vendor-neutral alert definitions; operations documentation; and focused label, privacy, route-normalization, emission, lifecycle, and synthetic-alert tests.
+- **Files Changed:** `build.gradle`, `gradle.lockfile`, `src/main/resources/application.properties`, `src/main/java/com/example/urlshortener/observability/*`, impacted creation/redirect/analytics/health components, `src/test/java/com/example/urlshortener/observability/*`, `ops/alerts.yaml`, `docs/operations.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** Covered by standing authorization; metric semantics, dependency addition, staged diff, and validation evidence remain available for human inspection.
+- **Accepted Output:** Micrometer instrumentation, Actuator metrics exposure, alert artifact, tests, and documented deployment-owner gaps.
+- **Edited Output:** None.
+- **Rejected Output:** Prometheus-specific rules, external telemetry infrastructure, and an invented duration for the separately worded “any sustained analytics loss” warning.
+- **Rejection Reason:** Export/routing infrastructure is deployment-specific, and the warning duration is not approved. The approved greater-than-1%-for-5-minutes loss alert is implemented exactly.
+- **Validation:** Focused observability and impacted-component suites passed; dependency lock regeneration completed successfully; `git diff --check` passed. Review confirmed only fixed tag keys/values and normalized routes, with deployment-specific routing/export gaps documented.
+- **Test Results:** `./gradlew --gradle-user-home /private/tmp/url-shortener-gradle.5lRGYH/project-home test --rerun-tasks --no-daemon` completed `BUILD SUCCESSFUL` in 12 seconds; JUnit XML reports 86 tests, 0 failures, 0 errors, and 0 skipped.
+- **Engineer Approval:** APPROVED under standing authorization on 2026-09-02.
+
 ### PROMPT-022
 
 - **Prompt ID:** PROMPT-022
