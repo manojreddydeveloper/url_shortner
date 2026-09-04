@@ -374,7 +374,7 @@ At one million active mappings, ten-character Base62 occupancy is approximately 
 | Event infrastructure | No Kafka, durable queue, separate analytics service, or analytics buffer. RDR-003 single-attempt fail-open semantics apply. |
 | Creation limit | Per derived client identity, capacity 20 and refill 10 per minute. |
 | Analytics-query limit | Per analytics bearer token, capacity 60 and refill 60 per minute. |
-| Redirect limit | No application quota in the current runtime; coarse connection and request protection belongs at the shared edge proxy. |
+| Redirect limit | No application quota in the pre-version-2 baseline; coarse connection and request protection belongs at the shared edge proxy. |
 | Limit identity | Direct peer unless the peer is an explicitly trusted proxy; ignore forwarding headers otherwise. Use a keyed in-memory pseudonymous derivation, never persist or log raw IP, and expire idle entries after 15 minutes. |
 | Limit reset and scaling | State reset on process restart is accepted. Multiple application instances require a new shared-enforcement decision. |
 | Rate rejection | Return `429 Too Many Requests` with bounded `Retry-After`; exact schema belongs to ARC-002. |

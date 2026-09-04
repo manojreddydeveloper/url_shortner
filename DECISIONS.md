@@ -389,10 +389,10 @@ This log records architecture proposals and approved architecture decisions deri
 
 - **Status:** APPROVED
 - **Requirements:** Version-2 migration roadmap only
-- **Context:** The current baseline is a single deployable application with a bounded process-local cache. The version-2 branch is intended to validate a two-instance runtime shape and shared cache behavior before any deeper microservice split is approved.
+- **Context:** The pre-version-2 baseline is a single deployable application with a bounded process-local cache. The version-2 branch is intended to validate a two-instance runtime shape and shared cache behavior before any deeper microservice split is approved.
 - **Proposed decision:** Run two application instances against one authoritative PostgreSQL datastore and one Redis cache service. Keep Flyway migrations on application startup, keep PostgreSQL authoritative, and treat Redis as a non-authoritative shared cache for hot redirect lookups.
 - **Alternatives evaluated:**
-  - Keep the single-instance baseline unchanged: simplest but does not exercise the requested multi-instance deployment shape.
+  - Keep the pre-version-2 baseline unchanged: simplest but does not exercise the requested multi-instance deployment shape.
   - Split immediately into multiple microservices: increases coordination and deployment complexity before the cache and replica story is validated.
   - Use Redis as the source of truth: incorrect because it weakens durability and schema authority.
 - **Advantages:** Validates replica-safe startup, shared caching, and local multi-container operations without losing PostgreSQL authority.
