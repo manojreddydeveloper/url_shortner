@@ -147,6 +147,132 @@ The traceability matrix currently records the following broad status:
 
 See [TRACEABILITY.md](TRACEABILITY.md) for the detailed status of each requirement and task.
 
+## Final engineering summary
+
+This repository now contains the core deliverables expected by the assignment:
+
+- a runnable URL shortener prototype with creation, redirect, analytics, health, rate limiting, and observability
+- a documented architecture baseline and API contract
+- implementation traceability across requirements, decisions, tasks, prompts, and review records
+- a validation record showing the build and test suite pass
+
+Plan and rationale:
+
+- use a modular Spring Boot service instead of a microservice split to keep the prototype reviewable and bounded
+- make PostgreSQL the authoritative store so uniqueness, persistence, and analytics queries remain simple and testable
+- keep analytics fail-open so redirect availability does not depend on append success
+- preserve destination URLs exactly after structural validation to avoid hidden normalization changes
+
+Artifacts produced:
+
+- application code under `src/main/java`
+- tests under `src/test/java`
+- migrations under `src/main/resources/db/migration`
+- architecture and API documentation in `docs/`
+- task, decision, review, and traceability records in the repository root
+
+Risks and trade-offs:
+
+- analytics is best-effort, not exactly-once
+- duplicate destination URLs create separate mappings by design
+- the prototype does not claim production recovery, backup, or multi-region guarantees
+- some higher-order review items remain documented as future work in `TASKS.md`
+
+Assumptions:
+
+- the supplied `URL_SHORTENER_PUBLIC_BASE_URL` is trusted configuration
+- PostgreSQL is available for the approved runtime contract
+- validation is performed within the approved repository and compose environment
+
+Limitations:
+
+- no idempotency key model is implemented
+- no expiration lifecycle is implemented in the baseline
+- no public analytics access is exposed without a token
+- performance validation beyond the documented unit and smoke checks is still a separate task
+
+Validation:
+
+- `./gradlew test` completed successfully in this pass
+- repository smoke and API smoke scripts are documented for the compose runtime
+- the traceability matrix and AI review log record the implementation and review trail
+
+## Three scenarios
+
+### Greenfield
+
+Objective:
+
+- build the URL shortener from an empty baseline into a reviewable prototype.
+
+Decomposition:
+
+1. establish the approved stack and repository scaffold
+2. define URL validation, short-code generation, and durable mapping creation
+3. add redirect, analytics, health, and operational surfaces
+4. wire tests, documentation, and traceability
+
+Execution:
+
+- the codebase implements the main user-facing flow in a single Spring Boot application
+- the persistence layer uses PostgreSQL migrations and JPA repositories
+- the API layer returns stable, safe error envelopes and bounded responses
+
+Validation:
+
+- `./gradlew test` passes
+- the documented contract and traceability documents align with the implementation
+
+### Brownfield
+
+Objective:
+
+- evolve an existing codebase without breaking established contracts.
+
+Decomposition:
+
+1. identify affected modules: configuration, web, redirect, analytics, persistence, and observability
+2. preserve stable behaviors such as redirect status, error envelopes, and analytics semantics
+3. update tests and documentation alongside implementation changes
+
+Execution:
+
+- module boundaries remain explicit so future changes can be localized
+- existing validation and error-handling behavior is kept stable where already approved
+- traceability documents capture where implementation evidence came from
+
+Validation:
+
+- build and test output shows the current behavior is still coherent after the documentation pass
+- the repository structure makes impacted modules easy to audit for regressions
+
+### Ambiguous
+
+Objective:
+
+- normalize a requirement that could be interpreted multiple ways.
+
+Example ambiguity:
+
+- how analytics should treat redirect clicks, retries, and automated traffic
+
+Decomposition:
+
+1. enumerate the plausible interpretations
+2. choose a testable policy that minimizes privacy risk and operational complexity
+3. document the rejected alternatives and the resulting contract
+
+Execution:
+
+- the approved baseline counts eligible redirect-path GET requests
+- suspected automation is reported separately
+- analytics failure does not block redirect success
+
+Validation:
+
+- the decision is reflected in [docs/api.md](docs/api.md), [docs/architecture.md](docs/architecture.md), and [TRACEABILITY.md](TRACEABILITY.md)
+- the behavior is deterministic enough to support unit and integration tests
+
 ## Markdown guide
 
 ### Root Markdown files
