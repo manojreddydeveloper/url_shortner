@@ -149,7 +149,7 @@ See [TRACEABILITY.md](TRACEABILITY.md) for the detailed status of each requireme
 
 ## Final engineering summary
 
-This repository now contains the core deliverables expected by the assignment:
+This repository contains the core deliverables expected by the assignment:
 
 - a runnable URL shortener prototype with creation, redirect, analytics, health, rate limiting, and observability
 - a documented architecture baseline and API contract
@@ -159,7 +159,7 @@ This repository now contains the core deliverables expected by the assignment:
 Plan and rationale:
 
 - use a modular Spring Boot service instead of a microservice split to keep the prototype reviewable and bounded
-- make PostgreSQL the authoritative store so uniqueness, persistence, and analytics queries remain simple and testable
+- use PostgreSQL as the authoritative store so uniqueness, persistence, and analytics queries stay simple and testable
 - keep analytics fail-open so redirect availability does not depend on append success
 - preserve destination URLs exactly after structural validation to avoid hidden normalization changes
 
@@ -193,7 +193,7 @@ Limitations:
 
 Validation:
 
-- `./gradlew test` completed successfully in this pass
+- `./gradlew test` completed successfully
 - repository smoke and API smoke scripts are documented for the compose runtime
 - the traceability matrix and AI review log record the implementation and review trail
 
@@ -203,7 +203,7 @@ Validation:
 
 Objective:
 
-- build the URL shortener from an empty baseline into a reviewable prototype.
+- build the URL shortener from a clean baseline into a reviewable prototype.
 
 Decomposition:
 
@@ -237,13 +237,13 @@ Decomposition:
 
 Execution:
 
-- module boundaries remain explicit so future changes can be localized
-- existing validation and error-handling behavior is kept stable where already approved
+- module boundaries remain explicit so future changes stay localized
+- existing validation and error-handling behavior remains stable where already approved
 - traceability documents capture where implementation evidence came from
 
 Validation:
 
-- build and test output shows the current behavior is still coherent after the documentation pass
+- build and test output show the current behavior is coherent after the documentation pass
 - the repository structure makes impacted modules easy to audit for regressions
 
 ### Ambiguous
