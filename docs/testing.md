@@ -35,3 +35,9 @@ For the version-2 compose runtime, run the smoke test after `docker compose up -
 ```shell
 ./scripts/compose-smoke.sh
 ```
+
+For an end-to-end live API check that exercises `POST /api/v1/links`, `GET /{code}`, and analytics retrieval through the edge proxy, run:
+
+```shell
+./scripts/compose-api-smoke.sh
+```

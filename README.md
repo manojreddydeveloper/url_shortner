@@ -98,6 +98,12 @@ The Compose file provides the runtime database connection settings for both appl
 ./scripts/compose-smoke.sh
 ```
 
+To exercise the live API flow end-to-end, including creation, redirect, and analytics retrieval through the edge proxy:
+
+```shell
+./scripts/compose-api-smoke.sh
+```
+
 If you run the application outside Docker Compose, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` for a PostgreSQL instance that matches the approved runtime contract.
 
 ## Prerequisites
