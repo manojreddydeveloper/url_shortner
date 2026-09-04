@@ -266,19 +266,19 @@ Retry-After: 30
 Content-Type: application/json
 ```
 
-The response uses the common error envelope with `RATE_LIMITED` and a bounded `Retry-After` value. Creation uses capacity 20/refill 10 per minute per derived client identity; analytics retrieval uses capacity 60/refill 60 per minute per bearer token. State is in-memory for the single-instance baseline and resets on restart.
+The response uses the common error envelope with `RATE_LIMITED` and a bounded `Retry-After` value. Creation uses capacity 20/refill 10 per minute per derived client identity; analytics retrieval uses capacity 60/refill 60 per minute per bearer token. Rate-limit state remains per application instance in memory and resets on restart; the current version-2 runtime does not yet distribute rate-limit state across replicas.
 
 Proposed scope:
 
 - Creation: limited.
 - Analytics retrieval: limited.
-- Redirect: no application quota in the single-instance baseline; coarse edge protection remains possible.
+- Redirect: no application quota in the current runtime; coarse edge protection remains possible at the shared edge proxy.
 
 ## 6. Caching contract
 
-- Baseline: application responses and resolution do not depend on Redis.
+- Version-2 runtime: application responses and resolution use a shared Redis cache for hot mappings, but Redis remains transparent to the API contract.
 - Redirect responses use `Cache-Control: no-store`.
-- If Redis mapping cache is added, it is transparent to the API and cannot change active, unknown, expired, or dependency-failed semantics.
+- Redis mapping cache cannot change active, unknown, expired, or dependency-failed semantics.
 - Unknown-code negative caching is not part of the baseline.
 - Database failure must not be returned as `404` because a cache lookup missed.
 

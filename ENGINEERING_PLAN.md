@@ -256,7 +256,7 @@ This matrix is normative for the requirements baseline. Exact JSON schemas and e
 - **Ambiguity:** Protected operations, client identity, quotas, burst capacity, distributed enforcement, recovery, and response headers are unspecified.
 - **Why it matters:** Rate limiting affects abuse resistance, legitimate users, proxy handling, reliability, state, and testability.
 - **Possible interpretations:** No prototype limits; limits only on creation and analytics; separate limits for every operation; per-IP, per-account, per-key, or combined identity.
-- **Recommended interpretation:** Apply a per-client creation token bucket with capacity 20 and refill 10 per minute, and a per-analytics-token query bucket with capacity 60 and refill 60 per minute. Do not apply an application redirect quota in the single-instance baseline. Identify clients from the direct peer or an explicitly trusted proxy chain, use an in-memory keyed pseudonymous identity rather than retaining raw IP, expire idle limit state after 15 minutes, accept state reset on restart, and return `429` with bounded `Retry-After`. Distributed enforcement requires a new decision if replicas are introduced.
+- **Recommended interpretation:** Apply a per-client creation token bucket with capacity 20 and refill 10 per minute, and a per-analytics-token query bucket with capacity 60 and refill 60 per minute. Do not apply an application redirect quota in the current runtime; coarse protection belongs at the shared edge proxy. Identify clients from the direct peer or an explicitly trusted proxy chain, use an in-memory keyed pseudonymous identity rather than retaining raw IP, expire idle limit state after 15 minutes, accept state reset on restart, and return `429` with bounded `Retry-After`. Distributed enforcement requires a new decision if replicas are introduced.
 - **Status:** APPROVED — RDR-004, 2026-09-02
 
 ### AMB-012 — Cache behavior
@@ -374,7 +374,7 @@ At one million active mappings, ten-character Base62 occupancy is approximately 
 | Event infrastructure | No Kafka, durable queue, separate analytics service, or analytics buffer. RDR-003 single-attempt fail-open semantics apply. |
 | Creation limit | Per derived client identity, capacity 20 and refill 10 per minute. |
 | Analytics-query limit | Per analytics bearer token, capacity 60 and refill 60 per minute. |
-| Redirect limit | No application quota in the single-instance baseline; coarse connection and request protection belongs at the trusted edge. |
+| Redirect limit | No application quota in the pre-version-2 baseline; coarse connection and request protection belongs at the shared edge proxy. |
 | Limit identity | Direct peer unless the peer is an explicitly trusted proxy; ignore forwarding headers otherwise. Use a keyed in-memory pseudonymous derivation, never persist or log raw IP, and expire idle entries after 15 minutes. |
 | Limit reset and scaling | State reset on process restart is accepted. Multiple application instances require a new shared-enforcement decision. |
 | Rate rejection | Return `429 Too Many Requests` with bounded `Retry-After`; exact schema belongs to ARC-002. |
@@ -587,3 +587,32 @@ The AI does not:
 - `AI_REVIEW.md` records AI review findings and the engineer's accepted, modified, deferred, or rejected disposition.
 
 Approval of this document authorizes planning and review only. It does not authorize application-code implementation.
+
+## 16. Version-2 migration roadmap
+
+This branch now implements the version-2 runtime overlay in Docker Compose: two application instances, one Redis service, and one public reverse-proxy entrypoint, while PostgreSQL remains authoritative and Flyway still runs on application startup. The overlay preserves the approved baseline and does not by itself approve a deeper microservice split.
+
+### 16.1 Version-2 objectives
+
+- Run two application instances on the local development stack and in the target deployment shape.
+- Use Redis as the shared cache for hot redirect lookup across instances.
+- Keep Flyway-managed PostgreSQL migrations as the source of truth for schema changes.
+- Preserve the existing observability, validation, and error boundaries while the runtime topology changes.
+- Keep a later microservice split as an explicit follow-on decision rather than an assumed outcome.
+
+### 16.2 Implemented workstreams
+
+| Workstream | Implemented outcome |
+| --- | --- |
+| Topology | Approved and implemented a two-instance runtime with Redis and a public reverse proxy. |
+| Runtime | `docker-compose.yml` now starts PostgreSQL, Redis, two application containers, and the `edge` proxy together. |
+| Schema | Flyway still runs on application startup and PostgreSQL remains the schema authority. |
+| Cache | Redis-backed shared-cache startup and shared redirect lookup are implemented for the version-2 runtime. |
+| Smoke validation | A repo-local compose smoke test verifies Redis readiness and proxy readiness through the compose network. |
+
+### 16.3 Version-2 guardrails
+
+- PostgreSQL remains authoritative for mappings and analytics until a separate decision changes that role.
+- Redis is a shared cache, not a source of truth.
+- Compose changes must not break the existing migration path or require manual schema setup.
+- The implemented version-2 overlay does not imply that all future architecture changes are approved; a deeper microservice split still needs an explicit decision.

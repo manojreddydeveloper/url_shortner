@@ -45,8 +45,9 @@
 
 ### Residual threats (owner: engineer; disposition: accepted)
 - **Bearer-token sharing**: Possession of the per-link analytics token grants analytics access; sharing the token with others inadvertently grants them access. Owner/operator must treat the token like a password. Disposition: accepted — client-side concern, not enforceable in baseline.
-- **Local rate-limit reset on process restart**: In-memory token buckets reset on restart; no distributed enforcement in the single-instance baseline. Disposition: accepted — operator must plan restarts with awareness; distributed limits require a new decision.
-- **Pseudonymous client identity not globally unique**: Rate-limit identity is keyed in-memory pseudonymously; different application instances may derive different identities for the same peer. Disposition: accepted — single-instance baseline; distributed deployment requires Redis or edge gateway.
+- **Local rate-limit reset on process restart**: In-memory token buckets reset on restart; no distributed enforcement in the current runtime. Disposition: accepted — operator must plan restarts with awareness; distributed limits require a new decision.
+- **Pseudonymous client identity not globally unique**: Rate-limit identity is keyed in-memory pseudonymously; different application instances may derive different identities for the same peer. Disposition: accepted — current version-2 runtime still uses per-instance rate-limit state; a shared limiter requires a new decision.
+- **Redis cache availability**: The version-2 runtime requires Redis at startup and uses it as a shared hot-cache for mappings, but Redis still is not the source of truth. Disposition: accepted — Redis outage blocks version-2 startup rather than being silently absorbed.
 - **No exactly-once analytics guarantee**: Analytics append is best-effort single attempt; events may be lost on failure without retry or buffer. Disposition: accepted — redirect availability preferred over completeness per RDR-003.
 
 ### Approved no-fetch boundary

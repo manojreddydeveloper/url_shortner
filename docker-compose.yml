@@ -1,4 +1,22 @@
-version: '3.8'
+x-app-common: &app-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment: &app-env
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/url_shortener
+    SPRING_DATASOURCE_USERNAME: url_shortener
+    SPRING_DATASOURCE_PASSWORD: url_shortener
+    SPRING_DATA_REDIS_HOST: redis
+    SPRING_DATA_REDIS_PORT: 6379
+    SPRING_FLYWAY_ENABLED: "true"
+    URL_SHORTENER_PUBLIC_BASE_URL: http://localhost:8080
+    APP_VERSION: docker
+    URL_SHORTENER_REDIS_REQUIRED: "true"
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
 
 services:
   postgres:
@@ -18,22 +36,39 @@ services:
       timeout: 5s
       retries: 10
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: url-shortener-app
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/url_shortener
-      SPRING_DATASOURCE_USERNAME: url_shortener
-      SPRING_DATASOURCE_PASSWORD: url_shortener
-      URL_SHORTENER_PUBLIC_BASE_URL: http://localhost:8080
-      APP_VERSION: docker
+  redis:
+    image: redis:7-alpine
+    container_name: url-shortener-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app-1:
+    <<: *app-common
+    container_name: url-shortener-app-1
+    expose:
+      - "8080"
+
+  app-2:
+    <<: *app-common
+    container_name: url-shortener-app-2
+    expose:
+      - "8080"
+
+  edge:
+    image: nginx:1.27-alpine
+    container_name: url-shortener-edge
+    depends_on:
+      - app-1
+      - app-2
     ports:
       - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   postgres_data:
