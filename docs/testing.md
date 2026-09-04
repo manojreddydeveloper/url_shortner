@@ -28,9 +28,9 @@ Run it from a clean build when validating reproducibility:
 ./gradlew clean test --rerun-tasks --no-daemon
 ```
 
-TST-001 requires two consecutive successful executions. TST-002 will document the isolated PostgreSQL command and the Docker Compose environment for the approved runtime baseline when that dependency is exercised.
+TST-001 requires two consecutive successful executions. TST-002 will document the isolated PostgreSQL command and the Docker Compose environment for the approved runtime; the current compose runtime includes PostgreSQL, Redis, two application instances, and the edge proxy.
 
-For the version-2 compose runtime, run the smoke test after `docker compose up -d --build`:
+For the version-2 compose runtime, run the smoke test after `docker compose up -d --build --remove-orphans`:
 
 ```shell
 ./scripts/compose-smoke.sh

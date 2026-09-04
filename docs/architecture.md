@@ -10,18 +10,18 @@
 - **Implementation authorized:** Yes, within the approved baseline
 - **Source:** `ENGINEERING_PLAN.md`, `TASKS.md`, and `TRACEABILITY.md`
 
-This document captures the approved baseline architecture for the current prototype. Major choices are recorded in `DECISIONS.md`; approval of this document does not replace task-level acceptance for implementation evidence.
+This document captures the approved baseline architecture for the current prototype and the implemented version-2 runtime overlay. Major choices are recorded in `DECISIONS.md`; approval of this document does not replace task-level acceptance for implementation evidence.
 
 REQ-001 through REQ-004 establish the functional and prototype quality baseline. Exact wire schemas remain ARC-002 work, persistence details remain ARC-003 work, and deployment-specific telemetry routing remains ARC-005 work.
 
 ## Architecture principles
 
-1. Start with one deployable application and one authoritative relational database.
+1. Start with one codebase and one authoritative relational database.
 2. Keep creation, redirect, analytics, and operations as internal modules with explicit boundaries.
 3. Use database constraints for correctness instead of distributed coordination.
 4. Keep redirect availability independent of analytics success under the approved fail-open policy.
 5. Collect the minimum analytics data needed for the approved report.
-6. Add Redis, queues, services, or replicas only when an approved requirement or measured result justifies them.
+6. Add Redis, queues, services, or replicas only when an approved requirement or measured result justifies them. The current version-2 runtime uses Redis and two application replicas behind a reverse proxy.
 7. Make external boundaries replaceable and testable without creating speculative internal frameworks.
 
 ### Approved technical stack
@@ -32,8 +32,8 @@ REQ-001 through REQ-004 establish the functional and prototype quality baseline.
 | Build | Gradle with the existing wrapper and dependency lock | Reproducible builds and no build-tool installation requirement. |
 | Application framework | Spring Boot | One deployable HTTP application with configuration, lifecycle, health, and test integration. |
 | Persistence | Spring Data JPA/Hibernate against PostgreSQL | Transactional mapping creation, case-sensitive uniqueness, indexed lookup, and analytics range queries. Hibernate is an implementation detail behind repository boundaries. |
-| Baseline stateful services | One PostgreSQL datastore | Authoritative mappings and minimal click events; no Redis, Kafka, queue, or second datastore. Docker Compose provides the local app-plus-database runtime. |
-| Deployment | Single-region, single-application-instance prototype | Matches the approved validation envelope; replicas and multi-region operation require a new decision. |
+| Baseline stateful services | PostgreSQL datastore plus Redis shared cache in the version-2 runtime | PostgreSQL remains authoritative for mappings and minimal click events; Redis backs shared hot redirect lookups; no Kafka or queue. Docker Compose provides the local app-plus-database-plus-cache runtime. |
+| Deployment | Two-application-instance version-2 runtime behind a reverse proxy | Matches the implemented local validation envelope; a deeper microservice split or multi-region operation requires a new decision. |
 
 The selected dependency set is intentionally limited to the existing Java/Spring/Gradle foundation plus the approved PostgreSQL/Hibernate persistence path. No dependency is installed by ARC-001. Future dependency changes still require engineer review, but the PostgreSQL runtime baseline is already approved and reflected in the repository.
 
@@ -44,15 +44,22 @@ The selected dependency set is intentionally limited to the existing Java/Spring
 ```mermaid
 flowchart LR
     Client[Client / Browser]
-    Edge[Trusted Edge or Load Balancer\nTLS, request limits]
-    App[URL Shortener Application\nModular Monolith]
+    Edge[Trusted Edge / Nginx Proxy\nTLS, request limits]
+    App1[URL Shortener Application\nInstance 1]
+    App2[URL Shortener Application\nInstance 2]
+    Redis[(Redis\nShared hot-cache)]
     DB[(PostgreSQL\nAuthoritative Data)]
     Telemetry[Approved Log / Metric Sink]
 
     Client -->|HTTPS API or short URL| Edge
-    Edge -->|Validated proxy metadata| App
-    App -->|Mapping and analytics SQL| DB
-    App -->|Privacy-safe telemetry| Telemetry
+    Edge -->|Validated proxy metadata| App1
+    Edge -->|Validated proxy metadata| App2
+    App1 -->|Shared cache read/write| Redis
+    App2 -->|Shared cache read/write| Redis
+    App1 -->|Mapping and analytics SQL| DB
+    App2 -->|Mapping and analytics SQL| DB
+    App1 -->|Privacy-safe telemetry| Telemetry
+    App2 -->|Privacy-safe telemetry| Telemetry
 ```
 
 ### Application modules
@@ -103,7 +110,7 @@ If retry-safe creation becomes required, add an explicit idempotency-key contrac
 
 1. The edge forwards `GET /{code}` to the application. Static API and health routes take precedence over the fixed-length code route.
 2. The HTTP layer rejects codes that do not match the approved format before a database or cache lookup.
-3. The resolver checks the process-local positive cache first and falls back to PostgreSQL on a cache miss.
+3. The resolver checks the shared Redis cache first and falls back to PostgreSQL on a cache miss.
 4. The resolver distinguishes:
    - active mapping;
    - unknown mapping;
@@ -222,18 +229,14 @@ Ten Base62 characters provide `62^10`, approximately `8.39 × 10^17`, possible c
 
 ## 7. Redirect cache and Redis
 
-### Baseline decision
+### Version-2 cache overlay
 
-The approved baseline uses a bounded process-local positive cache for hot mappings. Redis is **not required in the baseline**. The approved single-instance scale envelope does not justify another shared stateful dependency.
-
-### In-memory cache use
-
-The cache is a read-through and write-through optimization for immutable mappings:
+The implemented version-2 runtime uses Redis as the shared hot-cache for resolved mappings and requires Redis to be available at startup. The cache remains a read-through and write-through optimization for immutable mappings:
 
 - Key: the case-sensitive short code.
 - Value: the resolved `LinkEntity`.
 - Positive entries only; do not negative-cache unknown codes.
-- Eviction: least-recently-used, bounded by the configured maximum entry count.
+- TTL: configured per the application cache properties.
 - On hit: return the cached mapping without a datastore round trip.
 - On miss: query PostgreSQL and populate the cache on success.
 - On creation success: write through the persisted mapping after the durable transaction commits.
@@ -241,9 +244,7 @@ The cache is a read-through and write-through optimization for immutable mapping
 - Because links are immutable in the approved baseline, the cache does not need invalidation for edits or expiration. Any future disable, delete, or edit feature must add explicit invalidation.
 - A cached hit can still be served if PostgreSQL is temporarily unavailable; cache misses still depend on PostgreSQL.
 
-### Redis usage
-
-Redis remains unavailable in the baseline. If a later decision approves a shared cache or distributed rate-limit state, Redis can be reconsidered with explicit TTL, invalidation, negative-cache, and outage semantics.
+Redis is not used as the source of truth, primary analytics store, distributed lock manager, or event queue.
 
 ### Conditional distributed rate-limit use
 
@@ -291,7 +292,7 @@ A separate service does not remove the need for event delivery, storage, privacy
 ### Approved baseline translated into architecture
 
 - Apply limits to link creation and analytics retrieval because they are resource-intensive and abuse-sensitive.
-- Do not apply an application-level redirect quota in the single-instance baseline; coarse edge protection may still apply.
+- Do not apply an application-level redirect quota in the current runtime; coarse edge protection may still apply at the shared edge proxy.
 - For a single application instance, use a bounded in-memory token bucket with expiring entries.
 - Derive client identity only from the direct peer or trusted proxy chain configured by the operator.
 - Use the direct peer or explicitly trusted proxy identity, derive a keyed pseudonymous in-memory key, and expire idle state after 15 minutes. Never persist or log raw IP.

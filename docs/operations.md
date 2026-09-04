@@ -9,6 +9,8 @@ The service exposes Micrometer measurements through the Spring Boot metrics endp
 
 Request instrumentation normalizes creation, redirect, analytics, liveness, readiness, and unmatched traffic without retaining path parameters. Domain instrumentation distinguishes creation validation, success, database failure and collision behavior; malformed/unknown/active redirect behavior; cache hit, miss, and write-through behavior; analytics query and append outcomes; and readiness transitions. Rate-limit and explicit pool-utilization emitters use fixed enums/allowlists and are ready for the controls that SEC-IMPL-002 owns.
 
+The current runtime consists of two application instances behind the compose edge proxy plus a shared Redis cache and PostgreSQL datastore. Operational dashboards should therefore watch per-instance request/error rates, the shared Redis cache, and the proxy as part of the same local deployment view.
+
 ## Alerts and operational gaps
 
 [`ops/alerts.yaml`](../ops/alerts.yaml) is a vendor-neutral, synthetically tested definition of the approved RDR-004 thresholds. Deployment automation must translate its signals to the selected telemetry backend and preserve the comparisons and evaluation windows.
