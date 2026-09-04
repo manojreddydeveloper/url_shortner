@@ -161,6 +161,9 @@ This log records architecture proposals and approved architecture decisions deri
 | ADR-013 | Error and observability boundaries | Stable error envelope; privacy-safe operational telemetry separate from analytics | PROPOSED |
 | ADR-014 | Testing architecture | Layered tests with real PostgreSQL integration and controlled clock/random seams | PROPOSED |
 | ADR-015 | Redirect cache | Bounded process-local positive cache for hot mappings | APPROVED |
+| ADR-016 | Version-2 deployment topology | Two app instances with Redis-backed shared cache | APPROVED |
+| ADR-017 | Public entrypoint | Reverse-proxy load balancer in front of both app instances | APPROVED |
+| ADR-018 | Redis startup requirement | Redis required at application startup in version-2 | APPROVED |
 
 ## ADR-001 — Use a modular monolith
 
@@ -381,6 +384,51 @@ This log records architecture proposals and approved architecture decisions deri
 - **Trade-offs:** Cache state is per-process and may be lost on restart; eviction can reduce the hit ratio; cache contents are only as fresh as the immutable mapping model.
 - **Revisit when:** A shared cache, invalidation policy, or multi-instance coordination requirement is approved.
 - **Engineer disposition:** APPROVED — the engineer approved the process-local cache baseline on 2026-09-03.
+
+## ADR-016 — Move version-2 to a two-instance deployment with Redis-backed cache
+
+- **Status:** APPROVED
+- **Requirements:** Version-2 migration roadmap only
+- **Context:** The current baseline is a single deployable application with a bounded process-local cache. The version-2 branch is intended to validate a two-instance runtime shape and shared cache behavior before any deeper microservice split is approved.
+- **Proposed decision:** Run two application instances against one authoritative PostgreSQL datastore and one Redis cache service. Keep Flyway migrations on application startup, keep PostgreSQL authoritative, and treat Redis as a non-authoritative shared cache for hot redirect lookups.
+- **Alternatives evaluated:**
+  - Keep the single-instance baseline unchanged: simplest but does not exercise the requested multi-instance deployment shape.
+  - Split immediately into multiple microservices: increases coordination and deployment complexity before the cache and replica story is validated.
+  - Use Redis as the source of truth: incorrect because it weakens durability and schema authority.
+- **Advantages:** Validates replica-safe startup, shared caching, and local multi-container operations without losing PostgreSQL authority.
+- **Trade-offs:** Adds another stateful dependency and a wider operational surface. Redis outage and cache consistency semantics must be handled explicitly.
+- **Revisit when:** The engineer approves or rejects the version-2 migration roadmap, or a deeper service split becomes necessary.
+- **Engineer disposition:** APPROVED — the version-2 two-instance runtime, Redis service, and shared-cache wiring were implemented and smoke-validated on 2026-09-04.
+
+## ADR-017 — Add a public reverse-proxy entrypoint
+
+- **Status:** APPROVED
+- **Requirements:** Version-2 migration roadmap only
+- **Context:** Two app instances need one stable public entrypoint so local runs and future deployment references do not expose replica-specific ports.
+- **Proposed decision:** Put a reverse-proxy load balancer in front of both application instances and publish only the proxy port to the host. Keep the app instances on the internal compose network.
+- **Alternatives evaluated:**
+  - Publish both app ports directly: exposes replica-specific endpoints and does not represent a shared entrypoint.
+  - Use an external cloud load balancer only: does not satisfy local reproducibility.
+  - Keep a single app port with one instance: defeats the version-2 multi-instance goal.
+- **Advantages:** One stable public URL, simpler local testing, and realistic replica routing without exposing individual app containers.
+- **Trade-offs:** Adds one more runtime container and proxy configuration to maintain.
+- **Revisit when:** The engineer changes the deployment topology or chooses a different ingress mechanism.
+- **Engineer disposition:** APPROVED — the edge proxy was implemented and verified as the sole public entrypoint on 2026-09-04.
+
+## ADR-018 — Require Redis at startup for version-2
+
+- **Status:** APPROVED
+- **Requirements:** Version-2 migration roadmap only
+- **Context:** Redis is now part of the version-2 shared-cache design rather than an optional optimization.
+- **Proposed decision:** Fail application startup when Redis is unreachable, while keeping PostgreSQL as the authoritative datastore. Version-2 runtime containers must not become ready without Redis.
+- **Alternatives evaluated:**
+  - Keep Redis optional: simpler for local development but does not enforce the shared-cache runtime contract.
+  - Fail only on cache use: weaker guarantees and harder-to-diagnose runtime behavior.
+  - Move cache state back to per-instance memory: breaks the cross-replica cache objective.
+- **Advantages:** Clear deployment contract, earlier failure detection, and stronger consistency with the two-instance runtime shape.
+- **Trade-offs:** Redis outages block startup rather than being silently absorbed.
+- **Revisit when:** The engineer redefines Redis as optional or removes shared caching from version-2.
+- **Engineer disposition:** APPROVED — startup gating and compose validation confirmed Redis is required for the version-2 runtime on 2026-09-04.
 
 ## Approval checklist
 

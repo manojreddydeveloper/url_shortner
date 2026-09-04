@@ -24,6 +24,13 @@ public class LinkEntity {
     public LinkEntity(String shortCode, String destinationUrl, byte[] analyticsTokenHash, Instant createdAt) {
         this.shortCode = shortCode; this.destinationUrl = destinationUrl; this.analyticsTokenHash = analyticsTokenHash; this.createdAt = createdAt;
     }
+    public LinkEntity(Long id, String shortCode, String destinationUrl, byte[] analyticsTokenHash, Instant createdAt) {
+        this.id = id;
+        this.shortCode = shortCode;
+        this.destinationUrl = destinationUrl;
+        this.analyticsTokenHash = analyticsTokenHash;
+        this.createdAt = createdAt;
+    }
     public Long getId() { return id; }
     public String getShortCode() { return shortCode; }
     public String getDestinationUrl() { return destinationUrl; }

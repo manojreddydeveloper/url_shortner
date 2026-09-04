@@ -86,13 +86,19 @@ export APP_VERSION=development
 ./gradlew bootRun
 ```
 
-The approved local runtime uses PostgreSQL through Docker Compose. Start the application and database together with:
+The approved local runtime uses PostgreSQL through Docker Compose. The version-2 compose layout also starts Redis, a second application instance, and an Nginx edge proxy so the migration path can be exercised locally through one public entrypoint. Start the stack with:
 
 ```shell
-docker compose up --build
+docker compose up -d --build --remove-orphans
 ```
 
-The Compose file provides the runtime database connection settings for the `app` service. If you run the application outside Docker Compose, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` for a PostgreSQL instance that matches the approved runtime contract.
+The Compose file provides the runtime database connection settings for both application services and publishes the proxy on `http://localhost:8080`. Flyway runs automatically on application startup against PostgreSQL, so no separate migration step is required for the compose stack. After the stack is up, run the repository smoke check to confirm Redis and the public edge proxy are reachable through the compose network:
+
+```shell
+./scripts/compose-smoke.sh
+```
+
+If you run the application outside Docker Compose, set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` for a PostgreSQL instance that matches the approved runtime contract.
 
 ## Prerequisites
 

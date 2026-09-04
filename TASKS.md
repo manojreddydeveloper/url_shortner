@@ -218,6 +218,25 @@ For every task, “Human Approval Required” means the engineer must review and
 - **Security Considerations:** Pin or lock dependencies as approved; exclude secrets and local artifacts; use safe default binding and debug settings.
 - **Failure Scenarios:** Unapproved transitive dependency is added; environment-specific files are committed; scaffold embeds architectural behavior not yet reviewed.
 - **Impacted Components:** Repository root, build configuration, source and test directories, ignore rules, `README.md`
+
+### V2-TEST-001 — Add compose smoke validation
+
+- **Task ID:** V2-TEST-001
+- **Title:** Add compose smoke validation
+- **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: No
+- **Intent:** Provide a repeatable check that the version-2 runtime stack is healthy.
+- **Description:** Add a small repository script that verifies Redis readiness and the public edge proxy through the compose network after `docker compose up -d --build`.
+- **Dependencies:** V2-DEP-001, V2-IMPL-001
+- **Acceptance Criteria:**
+  1. A repo-local smoke command exists and is documented.
+  2. The command checks Redis and the public edge proxy.
+  3. The command fails fast when either dependency is unavailable.
+  4. The command can be run from a clean compose bring-up without manual container inspection.
+- **Test Requirements:** Run the smoke command against the running compose stack and confirm it returns success.
+- **Security Considerations:** Keep the probe read-only and avoid exposing secrets or internal-only endpoints.
+- **Failure Scenarios:** Edge publishes but does not route, Redis is unhealthy, or a local host-network assumption hides a compose failure.
+- **Impacted Components:** `scripts/compose-smoke.sh`, `docs/testing.md`
+- **Human Approval Required:** No
 - **Human Approval Required:** Yes — approve dependency changes before work and review the scaffold before feature implementation.
 
 ### FND-002 — Implement cross-cutting service foundations
@@ -809,4 +828,68 @@ For every task, “Human Approval Required” means the engineer must review and
 
 ## Current execution gate
 
-The next proposed task is **REQ-001**. No architecture or implementation task is ready until its documented dependencies and approval gates are satisfied.
+The version-2 runtime overlay has been implemented and smoke-validated in this branch. The remaining architecture question is whether any deeper service split should be approved in a future task.
+The version-2 task definitions below are retained for auditability and traceability of the migration work already executed on this branch.
+
+## PHASE 13 - Version-2 Migration
+
+### V2-ARC-001 — Approve the version-2 deployment topology
+
+- **Task ID:** V2-ARC-001
+- **Title:** Approve a two-instance deployment with Redis-backed caching
+- **Classification:** AI-friendly: Yes; Engineer-heavy: Yes; High-impact: Yes
+- **Intent:** Establish the target runtime shape for the `version-2` branch.
+- **Description:** Decide whether the next step is horizontal scaling of the current service, a Redis-backed shared cache, or a deeper microservice split. Record the intended topology, cache scope, failure behavior, and whether Flyway continues to run on application startup against PostgreSQL.
+- **Dependencies:** REQ-004, ARC-005
+- **Acceptance Criteria:**
+  1. The approved topology states how many application instances run locally and in the target deployment.
+  2. Redis is either approved as a shared cache or explicitly rejected with rationale.
+  3. PostgreSQL remains the authoritative datastore and migration source of truth.
+  4. The intended service split, if any, is stated clearly enough to drive implementation tasks.
+  5. The decision is recorded in `ENGINEERING_PLAN.md` and `DECISIONS.md`.
+- **Test Requirements:** Review the proposed deployment diagram, startup order, failure modes, and cache ownership boundaries against the approved baseline.
+- **Security Considerations:** Shared cache keys, secrets, and network exposure must be documented before any implementation starts.
+- **Failure Scenarios:** The plan describes two instances but only one can start; Redis is introduced without cache semantics; Flyway migrations become ambiguous under parallel startup.
+- **Impacted Components:** `ENGINEERING_PLAN.md`, `DECISIONS.md`, `docker-compose.yml`, future runtime configuration
+- **Human Approval Required:** Yes — explicit approval is required before any topology or dependency change is implemented.
+
+### V2-DEP-001 — Update the local runtime topology
+
+- **Task ID:** V2-DEP-001
+- **Title:** Update Docker Compose for PostgreSQL, Redis, two app instances, and a public load balancer
+- **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: Yes
+- **Intent:** Make the local runtime match the approved version-2 deployment shape.
+- **Description:** Update `docker-compose.yml` so local startup includes one PostgreSQL service, one Redis service, two application services, and one public reverse-proxy entrypoint that load-balances traffic across the app instances. Preserve Flyway-driven schema migration on application startup.
+- **Dependencies:** V2-ARC-001
+- **Acceptance Criteria:**
+  1. `docker compose up --build` starts PostgreSQL, Redis, two application containers, and a public load balancer without port conflicts.
+  2. Each application instance can connect to PostgreSQL and complete Flyway migration startup behavior.
+  3. Redis is reachable from the compose network and can be used by future cache wiring.
+  4. The public entrypoint routes to both application instances without exposing separate host ports for each app.
+  5. Health and readiness checks remain meaningful for each app instance.
+  6. Local documentation matches the updated runtime topology.
+- **Test Requirements:** Start the compose stack, confirm the load balancer serves traffic, confirm both app containers start, and confirm the database schema migrates successfully on startup.
+- **Security Considerations:** Do not expose secrets in compose logs or container names; keep service ports bounded to local development only.
+- **Failure Scenarios:** Both app instances race on startup and one fails migrations; the load balancer publishes without healthy upstreams; Redis is missing or unreachable.
+- **Impacted Components:** `docker-compose.yml`, `README.md`, local startup instructions, application startup path, proxy configuration
+- **Human Approval Required:** Yes — the engineer must review the resulting local runtime behavior.
+
+### V2-IMPL-001 — Implement Redis-backed redirect caching
+
+- **Task ID:** V2-IMPL-001
+- **Title:** Add Redis as the required shared cache for hot redirect lookups
+- **Classification:** AI-friendly: Yes; Engineer-heavy: No; High-impact: Yes
+- **Intent:** Replace the single-instance cache path with a shared cache that works across replicas and is required at startup.
+- **Description:** Add Redis client support, configure cache keys and TTLs, and wire redirect resolution so cache hits are shared across both app instances while PostgreSQL remains authoritative on misses and writes. Redis must be reachable during application startup in the version-2 runtime.
+- **Dependencies:** V2-ARC-001, V2-DEP-001
+- **Acceptance Criteria:**
+  1. Redirect lookups can read from Redis before hitting PostgreSQL.
+  2. Cache writes on creation and successful lookup reach Redis consistently.
+  3. Redis startup failure prevents the version-2 application containers from becoming ready.
+  4. Cache semantics are documented for positive hits, misses, TTL, and invalidation.
+  5. Tests cover cross-instance behavior, startup gating, and cache outage handling.
+- **Test Requirements:** Add unit, integration, and compose-level tests for cache hit, miss, expiry, startup gating, and outage behavior across both app instances.
+- **Security Considerations:** Redis must not store secrets or unapproved personal data; keys must be namespaced and bounded.
+- **Failure Scenarios:** One instance sees stale data, Redis startup is bypassed accidentally, or cache invalidation hides a newly created mapping.
+- **Impacted Components:** Future Redis client, redirect resolver, creation path, cache configuration, startup checks, integration tests
+- **Human Approval Required:** Yes — explicit approval is required before changing redirect caching, adding new runtime dependencies, or tightening startup requirements.

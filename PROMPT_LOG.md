@@ -753,3 +753,26 @@ Copy this template for every new material AI activity.
 - **Validation:** `./gradlew test --no-daemon --tests com.example.urlshortener.observability.StructuredLoggingIntegrationTest --tests com.example.urlshortener.health.DatabaseReadinessTest --tests com.example.urlshortener.integration.AnalyticsEndToEndIntegrationTest --tests com.example.urlshortener.web.error.GlobalExceptionHandlerTest --tests com.example.urlshortener.observability.AlertRulesTest` passed; `./gradlew test --no-daemon` passed; `docker compose ps` showed `app` and `postgres` healthy; `docker compose up -d --build app` rebuilt the app image from the checked-out source; `docker compose stop postgres` followed by `docker compose exec app sh -lc 'sleep 2; wget -S -qO- http://localhost:8080/health/ready'` returned `503`; `docker compose start postgres` restored readiness to `200`; live smoke checks from inside the app container confirmed `200` on `/health/live`, `201` on creation, `400` on malformed JSON, and `302` redirect with `Location` (wget followed the redirect target and observed a downstream `404`).
 - **Test Results:** 275 tests completed, 0 failures. Focused Gradle tests passed. Compose-backed smoke checks passed after rebuilding the app image from the current source tree. Host-side localhost access was blocked by the sandbox, so all live endpoint checks were executed from inside the app container.
 - **Engineer Approval:** PENDING
+
+---
+
+### PROMPT-033
+
+- **Prompt ID:** PROMPT-033
+- **Task ID:** UNASSIGNED — documentation alignment for the implemented version-2 runtime and smoke validation
+- **Date:** 2026-09-04
+- **Status:** VALIDATED
+- **Purpose:** Align the repository markdown with the implemented version-2 compose runtime, Redis-backed startup contract, and repeatable smoke validation.
+- **Context Provided:** The current repository state after version-2 runtime changes; `ENGINEERING_PLAN.md`, `DECISIONS.md`, `TASKS.md`, `TRACEABILITY.md`, `README.md`, and `docs/testing.md`; smoke-test behavior from `./scripts/compose-smoke.sh`; and the user request to update all markdown accordingly.
+- **Constraints:** Update documentation only; do not change application runtime behavior; keep the plan, decisions, task backlog, traceability, and usage docs consistent with the implemented compose stack and smoke test; do not claim engineer approval that was not explicitly recorded.
+- **Acceptance Criteria:** Version-2 runtime docs reflect the implemented two-instance Redis-backed compose stack; the public edge proxy and smoke test are documented; traceability records the executed version-2 work; no markdown file still describes the implemented version-2 runtime as only planned.
+- **AI Output Summary:** Updated the version-2 roadmap in `ENGINEERING_PLAN.md`, approved the version-2 ADR entries in `DECISIONS.md`, revised the local-run instructions in `README.md`, clarified the version-2 execution gate in `TASKS.md`, added version-2 execution evidence rows in `TRACEABILITY.md`, and appended this activity log entry.
+- **Files Changed:** `ENGINEERING_PLAN.md`, `DECISIONS.md`, `README.md`, `TASKS.md`, `TRACEABILITY.md`, `PROMPT_LOG.md`
+- **Engineer Review:** PENDING
+- **Accepted Output:** Documentation updates that align the repository markdown with the implemented version-2 runtime and smoke test.
+- **Edited Output:** None — the documentation edits were applied directly by the AI agent.
+- **Rejected Output:** None recorded.
+- **Rejection Reason:** Not applicable.
+- **Validation:** `git diff --check` passed after the documentation edits; repository inspection confirmed the version-2 sections, task gate, and runtime instructions now reference the implemented compose stack and smoke test.
+- **Test Results:** Not applicable — this prompt updated markdown only. The runtime smoke test itself was already executed successfully in the corresponding version-2 task work.
+- **Engineer Approval:** PENDING

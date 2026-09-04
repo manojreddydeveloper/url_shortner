@@ -29,3 +29,9 @@ Run it from a clean build when validating reproducibility:
 ```
 
 TST-001 requires two consecutive successful executions. TST-002 will document the isolated PostgreSQL command and the Docker Compose environment for the approved runtime baseline when that dependency is exercised.
+
+For the version-2 compose runtime, run the smoke test after `docker compose up -d --build`:
+
+```shell
+./scripts/compose-smoke.sh
+```

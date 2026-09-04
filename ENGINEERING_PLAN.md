@@ -587,3 +587,32 @@ The AI does not:
 - `AI_REVIEW.md` records AI review findings and the engineer's accepted, modified, deferred, or rejected disposition.
 
 Approval of this document authorizes planning and review only. It does not authorize application-code implementation.
+
+## 16. Version-2 migration roadmap
+
+This branch now implements the version-2 runtime overlay in Docker Compose: two application instances, one Redis service, and one public reverse-proxy entrypoint, while PostgreSQL remains authoritative and Flyway still runs on application startup. The overlay preserves the approved baseline and does not by itself approve a deeper microservice split.
+
+### 16.1 Version-2 objectives
+
+- Run two application instances on the local development stack and in the target deployment shape.
+- Use Redis as the shared cache for hot redirect lookup across instances.
+- Keep Flyway-managed PostgreSQL migrations as the source of truth for schema changes.
+- Preserve the existing observability, validation, and error boundaries while the runtime topology changes.
+- Keep a later microservice split as an explicit follow-on decision rather than an assumed outcome.
+
+### 16.2 Implemented workstreams
+
+| Workstream | Implemented outcome |
+| --- | --- |
+| Topology | Approved and implemented a two-instance runtime with Redis and a public reverse proxy. |
+| Runtime | `docker-compose.yml` now starts PostgreSQL, Redis, two application containers, and the `edge` proxy together. |
+| Schema | Flyway still runs on application startup and PostgreSQL remains the schema authority. |
+| Cache | Redis-backed shared-cache startup and shared redirect lookup are implemented for the version-2 runtime. |
+| Smoke validation | A repo-local compose smoke test verifies Redis readiness and proxy readiness through the compose network. |
+
+### 16.3 Version-2 guardrails
+
+- PostgreSQL remains authoritative for mappings and analytics until a separate decision changes that role.
+- Redis is a shared cache, not a source of truth.
+- Compose changes must not break the existing migration path or require manual schema setup.
+- The implemented version-2 overlay does not imply that all future architecture changes are approved; a deeper microservice split still needs an explicit decision.

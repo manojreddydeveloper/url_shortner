@@ -15,6 +15,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
         webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties = {
                 "url-shortener.public-base-url=https://sho.rt",
+                "url-shortener.redis.required=false",
                 "spring.autoconfigure.exclude="
                         + "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
                         + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"

@@ -45,6 +45,7 @@ abstract class AbstractIntegrationTest {
         registry.add("url-shortener.rate-limit.creation-refill-per-minute", () -> "1000");
         registry.add("url-shortener.rate-limit.analytics-capacity", () -> "1000");
         registry.add("url-shortener.rate-limit.analytics-refill-per-minute", () -> "1000");
+        registry.add("url-shortener.redis.required", () -> "false");
         registry.add("url-shortener.public-base-url", () -> "https://sho.rt");
     }
 
